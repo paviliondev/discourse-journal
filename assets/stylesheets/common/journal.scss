@@ -1,0 +1,106 @@
+body.journal-category {
+  table.topic-list {
+    th.posts,
+    td.posts {
+      display: none;
+    }
+  }
+}
+
+.topic-journal-page {
+  .time-gap {
+    display: none;
+  }
+
+  nav.post-controls .show-replies {
+    display: none;
+  }
+}
+
+.time-gap + .topic-post.entry, .time-gap + .topic-post.comment {
+  .topic-avatar, .topic-body {
+    border-top: 1px solid $primary-low;
+  }
+}
+
+.topic-post.entry + .time-gap, .topic-post.comment + .time-gap {
+  display: none;
+}
+
+nav.post-controls button.comment {
+  font-size: 1em;
+}
+
+.topic-post {
+  &.comment {
+    display: none;
+
+    &.show {
+      display: block;
+    }
+
+    .avatar-flair {
+      width: 12px;
+      height: 12px;
+      right: 16px;
+
+      i {
+        font-size: 8px;
+      }
+    }
+  }
+
+  &.comment, &.entry {
+    .post-notice.new-user {
+      display: none;
+    }
+  }
+}
+
+.show-comments {
+  margin-bottom: 10px;
+  display: inline-block;
+}
+
+.entry .show-comments {
+  padding-left: 105px;
+}
+
+.journal-topic-tip {
+  position: relative;
+  margin-top: 5px;
+  
+  .btn-topic-tip {
+    padding: 3px 6px;
+    font-size: .8706em;
+  }
+
+  .tip-details {
+    background-color: dark-light-diff($primary, $secondary, 95%, -85%);
+    box-shadow: shadow('dropdown');
+    padding: 10px 15px;
+    position: absolute;
+    top: 25px;
+    z-index: 9999;
+    width: 300px;
+
+    p {
+      margin: 0;
+    }
+
+    ul {
+      margin-bottom: 0;
+    }
+
+    li {
+      margin: 2px 0;
+    }
+  }
+}
+
+html.rtl {
+  .topic-post.comment {
+    padding-left: 0;
+    padding-right: 110px;
+  }
+}

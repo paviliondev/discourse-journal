@@ -1,0 +1,10 @@
+plugins:
+  journal_enabled:
+    client: true
+    default: true
+  journal_show_topic_tip:
+    client: true
+    default: true
+  journal_comments_default:
+    default: 3
+    client: true

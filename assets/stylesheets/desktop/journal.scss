@@ -1,0 +1,41 @@
+.topic-post.comment {
+  padding-left: 110px;
+  max-width: 647px;
+
+  .topic-avatar {
+    width: 30px;
+  }
+
+  .topic-body {
+    width: calc(100% - 30px);
+    padding: 10px 0 10px 0;
+
+    .regular {
+      margin-top: 0;
+
+      p {
+        margin: 0;
+      }
+
+      nav.post-controls .actions button {
+        font-size: 0.9em;
+        padding: 6px 8px;
+      }
+    }
+
+    .post-actions {
+      margin: 0;
+    }
+
+    .post-menu-area {
+      margin-top: 5px;
+      margin-bottom: 0;
+    }
+  }
+}
+
+.topic-journal-page {
+  .topic-map .map li:nth-child(4) {
+    text-align: center;
+  }
+}

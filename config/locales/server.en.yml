@@ -1,0 +1,5 @@
+en:
+  site_settings:
+    journal_enabled: "Enable Journal Plugin"
+    journal_show_topic_tip: "Show a tip about the mechanics of Journal topics under the titles of Journal topics"
+    journal_comments_default: "Maximum number of comments to display on journal entries by default."

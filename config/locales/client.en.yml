@@ -1,0 +1,49 @@
+en:
+  js:
+    category:
+      journal_settings_label: "Journal"
+      enable_journal: "Make all topics in this category journals."
+
+    composer:
+      composer_actions:
+        create_journal:
+          name: Create Journal
+          description: Create a new journal
+        create_entry:
+          name: Create Entry
+          description: Create a new entry in a journal
+        comment_on_entry:
+          name: Comment
+          description: Comment on a journal entry
+        reply_to_comment:
+          name: Reply
+          description: Reply to comment
+
+    last_entry_lowercase: last entry
+    entry_lowercase:
+      one: entry
+      other: entries
+    comment_lowercase:
+      one: comment
+      other: comments
+      
+    topic:
+      create_journal: 
+        label: "Create Journal"
+      entry:
+        title: "New Entry"
+        help: "begin composing a new entry"
+      comment:
+        title: 'Comment'
+        help: 'begin composing a comment on this entry'
+        show_comments:
+          all: 'show {{count}} comments'
+          more: 'show {{count}} more comments'
+      comment_reply:
+        title: 'Reply'
+        help: 'reply to a comment'
+
+      tip:
+        journal:
+          title: "Journal"
+          details: "Only the topic author can post entries. All users can post comments."
