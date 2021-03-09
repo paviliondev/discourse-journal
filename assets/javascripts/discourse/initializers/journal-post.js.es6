@@ -95,12 +95,18 @@ export default {
 
         defaultState(attrs, state) {
           let defaultState = this._super(attrs, state);
+          
+          const journalEnabled = attrs.posts.toArray()[0].topic.journal;
+          if (!journalEnabled) return defaultState;
+          
           defaultState["showComments"] = [];
+          
           return defaultState;
         },
 
         showComments(entryId) {
           let showComments = this.state.showComments;
+          
           if (showComments.indexOf(entryId) === -1) {
             showComments.push(entryId);
             this.state.showComments = showComments;
@@ -109,6 +115,9 @@ export default {
         },
 
         html(attrs, state) {
+          const journalEnabled = attrs.posts.toArray()[0].topic.journal;
+          if (!journalEnabled) return this._super(...arguments);
+          
           let posts = attrs.posts || [];
           let postArray = this.capabilities.isAndroid ? posts : posts.toArray();
 
@@ -169,14 +178,15 @@ export default {
 
       api.modifyClass("model:post-stream", {
         prependPost(post) {
-          const stored = this.storePost(post);
+          const journalEnabled = this.get("topic.journal");
+          if (!journalEnabled) return this._super(...arguments);
           
+          const stored = this.storePost(post);
           if (stored) {
             const posts = this.get("posts");
             let insertPost = () => posts.unshiftObject(stored);
 
-            const journalEnabled = this.get("topic.journal");
-            if (journalEnabled && post.post_number === 2 && posts[0].post_number === 1) {
+            if (post.post_number === 2 && posts[0].post_number === 1) {
               insertPost = () => posts.insertAt(1, stored);
             }
             
@@ -187,6 +197,9 @@ export default {
         },
 
         appendPost(post) {
+          const journalEnabled = this.get("topic.journal");
+          if (!journalEnabled) return this._super(...arguments);
+          
           const stored = this.storePost(post);
           
           if (stored) {
@@ -229,17 +242,24 @@ export default {
       
       api.reopenWidget("post-avatar", {
         html(attrs) {
+          const journalEnabled = attrs.topic.journal;
+          if (!journalEnabled) return this._super(...arguments);
+          
           if (attrs.reply_to_post_number) {
             this.settings.size = "small";
           } else {
             this.settings.size = "large";
           }
+          
           return this._super(attrs);
         }
       });
 
       api.reopenWidget("post", {
         html(attrs) {
+          const journalEnabled = attrs.topic.journal;
+          if (!journalEnabled) return this._super(...arguments);
+          
           if (attrs.cloaked) {
             return "";
           }
