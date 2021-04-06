@@ -45,16 +45,17 @@ export default {
       });
       
       api.modifyClass("component:topic-footer-buttons", {
-        @on("didInsertElement")
-        @observes("topic.journal")
-        hideFooterReply() {
+        didInsertElement() {
+          this._super(...arguments);
           const journalEnabled = this.get("topic.journal");
-          scheduleOnce("afterRender", () => {
-            $(
-              ".topic-footer-main-buttons > button.create:not(.entry)",
-              this.element
-            ).toggle(!journalEnabled);
-          });
+          if (journalEnabled) {
+            scheduleOnce("afterRender", () => {
+              $(
+                ".topic-footer-main-buttons > button.create",
+                this.element
+              ).hide();
+            });
+          }
         }
       });
       
