@@ -27,18 +27,26 @@ after_initialize do
     load File.expand_path(path, __FILE__)
   end
 
-  Category.register_custom_field_type('journal', :boolean)
-  add_to_class(:category, :journal) { ActiveModel::Type::Boolean.new.cast(custom_fields['journal']) }
+  register_category_custom_field_type("journal", :boolean)
+  add_to_class(:category, :journal) do
+    ActiveModel::Type::Boolean.new.cast(custom_fields["journal"])
+  end
+  add_to_class(:category, :journal_author_groups) do
+    if custom_fields["journal_author_groups"].present?
+      custom_fields["journal_author_groups"].split("|")
+    else
+      []
+    end
+  end
+  Site.preloaded_category_custom_fields << "journal"
+  Site.preloaded_category_custom_fields << "journal_author_groups"
+
   add_to_serializer(:basic_category, :journal) { object.journal }
-  Site.preloaded_category_custom_fields << 'journal' if Site.respond_to?(:preloaded_category_custom_fields)  
-  
+  add_to_serializer(:basic_category, :journal_author_groups) { object.journal_author_groups }
   add_to_serializer(:post, :journal) { object.topic.journal }
 
-  class ::Guardian
-    attr_accessor :post_opts
-    prepend DiscourseJournal::GuardianExtension
-  end
-
+  ::Guardian.attr_accessor :post_opts
+  ::Guardian.prepend DiscourseJournal::GuardianExtension
   ::Topic.include DiscourseJournal::TopicExtension
   ::TopicView.prepend DiscourseJournal::TopicViewExtension
   ::TopicViewSerializer.include DiscourseJournal::TopicViewSerializerExtension

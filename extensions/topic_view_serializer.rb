@@ -11,7 +11,8 @@ module DiscourseJournal
         :entry_count,
         :comment_count,
         :last_entry_post_number,
-        :first_entry_id
+        :first_entry_id,
+        :can_create_entry
       )
     end
 
@@ -62,7 +63,7 @@ module DiscourseJournal
     def include_last_entry_post_number?
       journal
     end
-    
+
     def journal_author
       BasicUserSerializer.new(
         object.topic.journal_author,
@@ -73,6 +74,10 @@ module DiscourseJournal
 
     def include_journal_author?
       journal
+    end
+
+    def can_create_entry
+      scope.can_create_entry_on_topic?(object.topic)
     end
   end
 end

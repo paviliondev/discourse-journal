@@ -8,3 +8,6 @@ plugins:
   journal_comments_default:
     default: 3
     client: true
+  journal_allow_any_author:
+    type: category_list
+    default: ""

@@ -1,14 +1,27 @@
 <section>
   <h3>{{i18n "category.journal_settings_label"}}</h3>
 
-  <section class='field'>
+  <section class="field">
     <label>
       {{input
         type="checkbox"
         checked=category.custom_fields.journal
       }}
 
-      {{i18n 'category.enable_journal'}}
+      {{i18n "category.enable_journal"}}
     </label>
+  </section>
+
+  <section class="field">
+    <label for="category-journal-authors">
+      {{i18n "category.journal_authors"}}
+    </label>
+    {{group-chooser
+      content=siteGroups
+      value=authorGroups
+      valueProperty="name"
+      labelProperty="name"
+      onChange=(action "onSelectAuthorGroup")
+    }}
   </section>
 </section>

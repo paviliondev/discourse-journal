@@ -3,6 +3,8 @@ en:
     category:
       journal_settings_label: "Journal"
       enable_journal: "Make all topics journals"
+      journal_authors: "Journal authors"
+      add_journal_authors: "Select author groups"
 
     composer:
       composer_actions:
@@ -12,12 +14,18 @@ en:
         create_entry:
           name: Create Entry
           description: Create a new entry in a journal
-        comment_on_entry:
+        edit_entry:
+          name: Edit Entry
+          description: Edit a journal entry
+        create_comment:
           name: Comment
           description: Comment on a journal entry
+        edit_comment:
+          name: Edit Comment
+          description: Edit comment on a journal entry
         reply_to_comment:
-          name: Reply
-          description: Reply to comment
+          name: Reply to Comment
+          description: Reply to comment on a journal entry
 
     last_entry_lowercase: last entry
     entry_lowercase:

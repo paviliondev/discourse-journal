@@ -1,6 +1,6 @@
 import { withPluginApi } from "discourse/lib/plugin-api";
 import discourseComputed, { on, observes } from "discourse-common/utils/decorators";
-import { REPLY, CREATE_TOPIC } from "discourse/models/composer";
+import { REPLY, CREATE_TOPIC, EDIT } from "discourse/models/composer";
 import { computed } from "@ember/object";
 import { alias } from "@ember/object/computed";
 
@@ -9,19 +9,34 @@ export default {
   initialize(container) {
     const siteSettings = container.lookup("site-settings:main");
     if (!siteSettings.journal_enabled) return;
+    
+    function getJournalComposerKey(action, composerModel) {
+      let key;
+      let post = composerModel.post;
+
+      if (action === CREATE_TOPIC) {
+        key = "create_journal";
+      } else if (action === REPLY && post) {
+        key = post.reply_to_post_number ? "reply_to_comment" : "create_comment";
+      } else if (action === EDIT && post) {
+        key = post.reply_to_post_number ? "edit_comment" : "edit_entry"
+      } else {
+        key = "create_entry";
+      }
+
+      return key;
+    }
 
     function getJournalComposerText(type) {
-      let icon;
+      let icon = "reply";
 
-      if (["create_entry", "reply_to_comment"].includes(type)) {
-        icon = "reply";
-      } else if (type === "comment_on_entry") {
+      if (type === "create_comment") {
         icon = "comment";
       } else if (type === "create_journal") {
         icon = "plus";
+      } else if (["edit_entry", "edit_comment"].includes(type)) {
+        icon = "pencil-alt";
       }
-
-      if (!icon) return false;
 
       return {
         icon,
@@ -40,16 +55,7 @@ export default {
 
         @discourseComputed('model.action', "model.post")
         journalComposerText(action, post) {
-          let key;
-
-          if (action === CREATE_TOPIC) {
-            key = "create_journal";
-          } else if (action === REPLY && post) {
-            key = post.reply_to_post_number ? "reply_to_comment" : "comment_on_entry";
-          } else {
-            key = "create_entry";
-          }
-
+          let key = getJournalComposerKey(action, this.model);
           return getJournalComposerText(key);
         },
 
@@ -75,8 +81,9 @@ export default {
       api.modifyClass("component:composer-action-title", {
         @discourseComputed("options", "action", "model.category")
         actionTitle(opts, action, category) {
-          let text = getJournalComposerText(action);
-   
+          let key = getJournalComposerKey(action, this.model);
+          let text = getJournalComposerText(key);
+
           if (category && category.journal && text) {            
             return I18n.t(text.name);
           } else {
@@ -96,7 +103,7 @@ export default {
 
         commenting: alias("postSnapshot.journal"),
         commentKey: computed("commenting", function() {
-          return this.post.reply_to_post_number ? "reply_to_comment" : "comment_on_entry";
+          return getJournalComposerKey(this.action, this.composerModel);
         }),
 
         iconForComposerAction: computed("action", "commenting", function () {

@@ -1,5 +1,6 @@
 .topic-post.comment {
-  padding-left: calc(5% + 30px);
+  padding-left: 20px;
+  margin-left: 10px;
 
   .topic-body {
     .topic-meta-data {
@@ -11,12 +12,23 @@
     }
 
     .post-menu-area {
-      margin-top: 5px;
-      margin-bottom: 0;
+      margin: 0;
+
+      nav {
+        text-align: right;
+      }
     }
   }
 }
 
 .topic-journal-page nav.post-controls .actions {
   justify-content: flex-end;
+
+  button {
+    flex: unset;
+  }
+}
+
+.time-gap + .topic-post.comment article {
+  border-top: 1px solid $primary-low;
 }

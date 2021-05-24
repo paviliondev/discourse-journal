@@ -15,25 +15,20 @@ body.journal-category {
   nav.post-controls .show-replies {
     display: none;
   }
-}
 
-.time-gap + .topic-post.entry, .time-gap + .topic-post.comment {
-  .topic-avatar, .topic-body {
-    border-top: 1px solid $primary-low;
+  .topic-timeline .reply-to-post {
+    display: none;
   }
-}
-
-.topic-post.entry + .time-gap, .topic-post.comment + .time-gap {
-  display: none;
 }
 
 nav.post-controls button.comment {
   font-size: 1em;
 }
 
-.topic-post {
+div.topic-post {
   &.comment {
     display: none;
+    border-left: 2px solid $primary-low;
 
     &.show {
       display: block;
@@ -47,6 +42,53 @@ nav.post-controls button.comment {
       i {
         font-size: 8px;
       }
+    }
+
+    .topic-body {
+      .topic-meta-data {
+        padding: 0 5px 0.25em 11px;
+      }
+
+      .cooked {
+        padding-top: .25em;
+      }
+
+      .post-controls .actions {
+        display: inline-flex;
+
+        button {
+          font-size: 0.9em;
+          padding: 6px;
+
+          &.create {
+            margin-left: 0;
+
+            .d-icon {
+              margin-right: 0;
+            }
+          }
+
+          &.bookmark {
+            display: none;
+          }
+        }
+      }
+
+      .who-liked,
+      .who-read {
+        position: absolute;
+        background-color: $secondary;
+        box-shadow: shadow('dropdown');
+        right: 0;
+        margin: 0;
+        z-index: 1;
+        padding: .5em 1em;
+        border-top: 1px solid $primary-low;
+      }
+    }
+
+    + .topic-post.entry {
+      margin-top: 30px;
     }
   }
 

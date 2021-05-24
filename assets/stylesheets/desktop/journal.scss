@@ -1,5 +1,6 @@
 .topic-post.comment {
-  padding-left: 110px;
+  padding-left: 50px;
+  margin-left: 60px;
   max-width: 647px;
 
   .topic-avatar {
@@ -17,20 +18,27 @@
         margin: 0;
       }
 
-      nav.post-controls .actions button {
-        font-size: 0.9em;
-        padding: 6px 8px;
+      .post-controls .actions > *:not(.like):not(.double-button) {
+        display: none;
+        transition: .5s all;
+      }
+
+      .post-menu-area {
+        margin: 0;
+        right: 0;
+        bottom: 0;
+        position: absolute;
+        background: $secondary;
       }
     }
 
     .post-actions {
       margin: 0;
     }
+  }
 
-    .post-menu-area {
-      margin-top: 5px;
-      margin-bottom: 0;
-    }
+  &:hover .topic-body .regular .post-controls .actions > * {
+    display: inline-block !important;
   }
 }
 
@@ -38,4 +46,14 @@
   .topic-map .map li:nth-child(4) {
     text-align: center;
   }
+}
+
+.time-gap + .topic-post.entry, .time-gap + .topic-post.comment {
+  .topic-avatar, .topic-body {
+    border-top: 1px solid $primary-low;
+  }
+}
+
+.topic-post.entry + .time-gap, .topic-post.comment + .time-gap {
+  display: none;
 }
