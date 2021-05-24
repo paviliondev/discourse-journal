@@ -15,13 +15,13 @@ register_asset "stylesheets/mobile/journal.scss", :mobile
 after_initialize do
   %w(
     ../lib/journal/engine.rb
-    ../extensions/category_custom_field_extension.rb
-    ../extensions/guardian_extension.rb
-    ../extensions/post_creator_extension.rb
-    ../extensions/topic_extension.rb
-    ../extensions/topic_list_item_serializer_extension.rb
-    ../extensions/topic_view_extension.rb
-    ../extensions/topic_view_serializer_extension.rb
+    ../extensions/category_custom_field.rb
+    ../extensions/guardian.rb
+    ../extensions/post_creator.rb
+    ../extensions/topic.rb
+    ../extensions/topic_list_item_serializer.rb
+    ../extensions/topic_view.rb
+    ../extensions/topic_view_serializer.rb
     ../jobs/update_category_post_order.rb
   ).each do |path|
     load File.expand_path(path, __FILE__)
