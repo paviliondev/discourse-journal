@@ -36,14 +36,21 @@ export default {
           },
         }
       });
-      
+
       api.modifyClass("model:topic", {
         @discourseComputed("journal")
         showJournalTip(journalEnabled) {
           return journalEnabled && siteSettings.journal_show_topic_tip;
+        },
+  
+        @discourseComputed("highest_post_number", "url", "last_entry_post_number")
+        lastPostUrl(highestPostNumber, url, lastEntryPostNumber) {
+          return lastEntryPostNumber ?
+            this.urlForPostNumber(lastEntryPostNumber) :
+            this.urlForPostNumber(highestPostNumber);
         }
       });
-      
+
       api.modifyClass("component:topic-footer-buttons", {
         didInsertElement() {
           this._super(...arguments);
@@ -56,6 +63,17 @@ export default {
               ).hide();
             });
           }
+        }
+      });
+      
+      api.reopenWidget('topic-timeline', {
+        position() {
+          const position = this._super();
+          if (topic.journal) {
+            position.lastRead = null;
+            position.last_read_post_number = null;
+          }
+          return position;
         }
       });
       
@@ -88,22 +106,6 @@ export default {
           const stream = this.get("postStream.stream");
           const readPos = stream.indexOf(lastReadId) || 0;
           return readPos < stream.length - 1 && readPos > position;
-        }
-      });
-      
-      api.modifyClass("component:topic-navigation", {
-        _performCheckSize() {
-          if (!this.element || this.isDestroying || this.isDestroyed) return;
-
-          if (this.get("topic.journal")) {
-            const info = this.get("info");
-            info.setProperties({
-              renderTimeline: false,
-              renderAdminMenuButton: true
-            });
-          } else {
-            this._super(...arguments);
-          }
         }
       });
       

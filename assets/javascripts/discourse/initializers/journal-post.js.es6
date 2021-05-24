@@ -1,8 +1,9 @@
-import discourseComputed from "discourse-common/utils/decorators";
+import discourseComputed, { observes } from "discourse-common/utils/decorators";
 import PostsWithPlaceholders from "discourse/lib/posts-with-placeholders";
 import { withPluginApi } from "discourse/lib/plugin-api";
 import { h } from "virtual-dom";
-import { next } from "@ember/runloop";
+import { next, once } from "@ember/runloop";
+import { alias } from "@ember/object/computed";
 
 export default {
   name: "journal-post",
@@ -14,7 +15,7 @@ export default {
       const store = api.container.lookup("store:main");
       const appEvents = api.container.lookup("service:app-events");
       const currentUser = api.getCurrentUser();
-      
+
       api.includePostAttributes(
         "journal",
         "topic",
@@ -177,9 +178,82 @@ export default {
       });
 
       api.modifyClass("model:post-stream", {
+        journal: alias('topic.journal'),
+
+        arrayEqual(arr1, arr2) {
+          return JSON.stringify(arr1) === JSON.stringify(arr2);
+        },
+
+        @discourseComputed('posts.[]', 'stream.[]')
+        entries(posts, stream) {
+          return posts.filter(p => !p.reply_to_post_number);
+        },
+
+        @observes('entries.[]')
+        modifyStream() {
+          const stream = this.stream;
+          const entryIds = this.entries.map(p => p.id);
+          const journal = this.journal;
+
+          if (journal && !this.arrayEqual(entryIds, stream)) {
+            this.set('stream', entryIds);
+          }
+        },
+
+        @discourseComputed(
+          "isMegaTopic",
+          "stream.length",
+          "topic.highest_post_number",
+          "journal"
+        )
+        filteredPostsCount(isMegaTopic, streamLength, topicHighestPostNumber, journal) {
+          return journal ? this.entries.length : this._super(...arguments);
+        },
+
+        closestPostForPostNumber(postNumber) {
+          if (!this.hasPosts) {
+            return;
+          }
+
+          if (this.journal) {
+            let closest = null;
+            this.entries.forEach((p) => {
+              if (!closest) {
+                closest = p;
+                return;
+              }
+
+              if (
+                Math.abs(postNumber - p.get("post_number")) <
+                Math.abs(closest.get("post_number") - postNumber)
+              ) {
+                closest = p;
+              }
+            });
+
+            return closest;
+          } else {
+            return this._super(...arguments);
+          }
+        },
+
+        progressIndexOfPostId(post) {
+          if (this.journal) {
+            let replyToPostNumber = post.get("reply_to_post_number");
+
+            while (replyToPostNumber) {
+              post = this.postForPostNumber(replyToPostNumber);
+              replyToPostNumber = post.get("reply_to_post_number");
+            }
+
+            return post.get("post_number");
+          } else {
+            return this._super(...arguments);
+          }
+        },
+
         prependPost(post) {
-          const journalEnabled = this.get("topic.journal");
-          if (!journalEnabled) return this._super(...arguments);
+          if (!this.journal) return this._super(...arguments);
           
           const stored = this.storePost(post);
           if (stored) {
@@ -197,11 +271,10 @@ export default {
         },
 
         appendPost(post) {
-          const journalEnabled = this.get("topic.journal");
-          if (!journalEnabled) return this._super(...arguments);
-          
+          if (!this.journal) return this._super(...arguments);
+
           const stored = this.storePost(post);
-          
+
           if (stored) {
             const posts = this.get("posts");
 
@@ -239,7 +312,17 @@ export default {
           return post;
         }
       });
-      
+
+      api.reopenWidget("timeline-last-read", {
+        html(attrs) {
+          if (this.parentWidget.attrs.topic && this.parentWidget.attrs.topic.journal) {
+            return null;
+          } else {
+            return this._super(...arguments);
+          }
+        },
+      });
+
       api.reopenWidget("post-avatar", {
         html(attrs) {
           const journalEnabled = attrs.topic.journal;
