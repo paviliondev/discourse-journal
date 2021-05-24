@@ -90,18 +90,18 @@ export default {
           return args;
         }
       });
-      
+
       api.reopenWidget("post-stream", {
         buildKey: () => "post-stream",
 
         defaultState(attrs, state) {
           let defaultState = this._super(attrs, state);
-          
+
           const journalEnabled = attrs.posts.toArray()[0].topic.journal;
           if (!journalEnabled) return defaultState;
-          
+
           defaultState["showComments"] = [];
-          
+
           return defaultState;
         },
 
@@ -118,7 +118,7 @@ export default {
         html(attrs, state) {
           const journalEnabled = attrs.posts.toArray()[0].topic.journal;
           if (!journalEnabled) return this._super(...arguments);
-          
+
           let posts = attrs.posts || [];
           let postArray = this.capabilities.isAndroid ? posts : posts.toArray();
 
@@ -254,7 +254,7 @@ export default {
 
         prependPost(post) {
           if (!this.journal) return this._super(...arguments);
-          
+
           const stored = this.storePost(post);
           if (stored) {
             const posts = this.get("posts");
@@ -263,7 +263,7 @@ export default {
             if (post.post_number === 2 && posts[0].post_number === 1) {
               insertPost = () => posts.insertAt(1, stored);
             }
-            
+
             insertPost();
           }
 
@@ -308,7 +308,7 @@ export default {
               this.set("lastAppended", stored);
             }
           }
-          
+
           return post;
         }
       });
@@ -327,13 +327,13 @@ export default {
         html(attrs) {
           const journalEnabled = attrs.topic.journal;
           if (!journalEnabled) return this._super(...arguments);
-          
+
           if (attrs.reply_to_post_number) {
             this.settings.size = "small";
           } else {
             this.settings.size = "large";
           }
-          
+
           return this._super(attrs);
         }
       });
@@ -342,7 +342,7 @@ export default {
         html(attrs) {
           const journalEnabled = attrs.topic.journal;
           if (!journalEnabled) return this._super(...arguments);
-          
+
           if (attrs.cloaked) {
             return "";
           }

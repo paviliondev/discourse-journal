@@ -6,7 +6,7 @@ export default {
   initialize(container) {
     const siteSettings = container.lookup("site-settings:main");
     if (!siteSettings.journal_enabled) return;
-    
+
     withPluginApi('0.8.12', api => {
       api.modifyClass('component:d-navigation', {
         @discourseComputed("hasDraft", "category.journal")
@@ -18,12 +18,12 @@ export default {
           }
         },
       });
-      
+
       api.modifyClass('route:discovery', {
         discoveryCategory() {
           return this.controllerFor("navigation/category").get("category");
         },
-        
+
         actions: {
           didTransition() {
             const category = this.discoveryCategory();

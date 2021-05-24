@@ -11,7 +11,7 @@ export default {
   initialize(container) {
     const siteSettings = container.lookup("site-settings:main");
     if (!siteSettings.journal_enabled) return;
-    
+  
     withPluginApi("0.8.12", api => {
       api.modifyClass('route:topic', {
         isJournal() {
@@ -65,7 +65,7 @@ export default {
           }
         }
       });
-      
+
       api.reopenWidget('topic-timeline', {
         position() {
           const position = this._super();
@@ -76,7 +76,7 @@ export default {
           return position;
         }
       });
-      
+
       api.modifyClass("component:topic-progress", {
         @discourseComputed(
           "postStream.loaded",
@@ -108,7 +108,7 @@ export default {
           return readPos < stream.length - 1 && readPos > position;
         }
       });
-      
+
       function renderParticipants(userFilters, participants) {
         if (!participants) {
           return;
@@ -121,7 +121,7 @@ export default {
           });
         });
       }
-      
+
       api.reopenWidget("topic-map-summary", {
         html(attrs, state) {
           if (attrs.journal) {
@@ -177,7 +177,7 @@ export default {
               )
             ])
           );
-          
+
           contents.push(
             h("li", [
               numberNode(topic.comment_count),

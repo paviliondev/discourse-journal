@@ -12,7 +12,7 @@ export default {
 
     function getJournalComposerText(type) {
       let icon;
-      
+
       if (["create_entry", "reply_to_comment"].includes(type)) {
         icon = "reply";
       } else if (type === "comment_on_entry") {
@@ -20,29 +20,28 @@ export default {
       } else if (type === "create_journal") {
         icon = "plus";
       }
-      
+
       if (!icon) return false;
-      
+
       return {
         icon,
         name: `composer.composer_actions.${type}.name`,
         description: `composer.composer_actions.${type}.description`
       }
-      
     }
 
     withPluginApi("0.8.12", api => {
       api.modifyClass('controller:composer', {
-        
+
         @discourseComputed('model.category')
         isJournal(category) {
           return category && category.journal;
         },
-        
+
         @discourseComputed('model.action', "model.post")
         journalComposerText(action, post) {
           let key;
-          
+
           if (action === CREATE_TOPIC) {
             key = "create_journal";
           } else if (action === REPLY && post) {
@@ -62,7 +61,7 @@ export default {
             return this._super(...arguments);
           }
         },
-        
+
         @discourseComputed("model.action", "isWhispering", "isJournal", "journalComposerText.icon")
         saveIcon(modelAction, isWhispering, isJournal, journalIcon) {
           if (isJournal) {
@@ -71,13 +70,13 @@ export default {
             return this._super(...arguments);
           }
         },
-      })
-      
+      });
+
       api.modifyClass("component:composer-action-title", {
         @discourseComputed("options", "action", "model.category")
         actionTitle(opts, action, category) {
           let text = getJournalComposerText(action);
-               
+   
           if (category && category.journal && text) {            
             return I18n.t(text.name);
           } else {
@@ -94,12 +93,12 @@ export default {
           }
           this._super(...arguments);
         },
-        
+
         commenting: alias("postSnapshot.journal"),
         commentKey: computed("commenting", function() {
           return this.post.reply_to_post_number ? "reply_to_comment" : "comment_on_entry";
         }),
-        
+
         iconForComposerAction: computed("action", "commenting", function () {
           if (this.commenting) {
             return getJournalComposerText(this.commentKey).icon;
@@ -107,7 +106,7 @@ export default {
             return this._super(...arguments);
           }
         }),
-        
+
         content: computed("seq", "commenting", function () {
           if (this.commenting) {
             const text = getJournalComposerText(this.commentKey);
