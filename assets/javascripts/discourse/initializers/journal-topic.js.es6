@@ -77,38 +77,6 @@ export default {
         }
       });
 
-      api.modifyClass("component:topic-progress", {
-        @discourseComputed(
-          "postStream.loaded",
-          "topic.currentPost",
-          "postStream.filteredPostsCount",
-          "topic.journal"
-        )
-        hideProgress(loaded, currentPost, filteredPostsCount, journalEnabled) {
-          return (
-            journalEnabled ||
-            !loaded ||
-            !currentPost ||
-            (!this.site.mobileView && filteredPostsCount < 2)
-          );
-        },
-
-        @discourseComputed(
-          "progressPosition",
-          "topic.last_read_post_id",
-          "topic.journal"
-        )
-        showBackButton(position, lastReadId, journalEnabled) {
-          if (!lastReadId || journalEnabled) {
-            return;
-          }
-
-          const stream = this.get("postStream.stream");
-          const readPos = stream.indexOf(lastReadId) || 0;
-          return readPos < stream.length - 1 && readPos > position;
-        }
-      });
-
       function renderParticipants(userFilters, participants) {
         if (!participants) {
           return;
