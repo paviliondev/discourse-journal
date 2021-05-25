@@ -77,6 +77,21 @@ export default {
         }
       });
 
+      api.modifyClass("component:topic-progress", {
+        @discourseComputed(
+          "progressPosition",
+          "topic.last_read_post_id",
+          "topic.journal"
+        )
+        showBackButton(position, lastReadId, journalEnabled) {
+          if (journalEnabled) {
+            return false;
+          } else {
+            return this._super(...arguments);
+          }
+        }
+      });
+
       function renderParticipants(userFilters, participants) {
         if (!participants) {
           return;
