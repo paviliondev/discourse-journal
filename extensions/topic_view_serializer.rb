@@ -77,7 +77,7 @@ module DiscourseJournal
     end
 
     def can_create_entry
-      scope.can_create_entry_on_topic?(object.topic)
+      scope&.user && scope.can_create_entry_on_topic?(object.topic)
     end
   end
 end
