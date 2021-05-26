@@ -3,33 +3,36 @@
 module DiscourseJournal
   module GuardianExtension
     def can_create_post_on_topic?(topic)
-      if journal?(topic) && post_is_journal_entry?
-        user_in_author_groups(topic) || @user.id === topic.user_id
-      else
-        super
-      end
+      can_create_entry_on_topic?(topic) || super
+    end
+
+    def can_create_post?(parent)
+      can_create_entry_on_topic?(parent) || super
     end
 
     def can_create_entry_on_topic?(topic)
-      journal?(topic) && user_in_author_groups(topic)
+      journal?(topic) && (user_in_author_groups(topic) || user_created_topic(topic))
     end
 
     def journal?(topic)
       topic&.category&.journal
     end
 
-    def post_is_journal_entry?
-      post_opts && !post_opts[:reply_to_post_number]
+    def post_is_journal_entry?(post)
+      post && post.reply_to_post_number.blank?
+    end
+
+    def user_created_topic(topic)
+      @user.id === topic&.user_id
     end
 
     def can_wiki?(post)
-      return false if post && post.topic.category&.journal
-      super
+      !journal?(post&.topic) && super
     end
 
     def user_in_author_groups(topic)
       topic&.category&.journal_author_groups.include?('everyone') ||
-      topic&.category&.journal_author_groups.include?(@user.groups.map(&:name))
+      ((topic&.category&.journal_author_groups & @user.groups.map(&:name)).size > 0)
     end
   end
 end

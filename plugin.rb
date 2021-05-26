@@ -45,7 +45,6 @@ after_initialize do
   add_to_serializer(:basic_category, :journal_author_groups) { object.journal_author_groups }
   add_to_serializer(:post, :journal) { object.topic.journal }
 
-  ::Guardian.attr_accessor :post_opts
   ::Guardian.prepend DiscourseJournal::GuardianExtension
   ::Topic.include DiscourseJournal::TopicExtension
   ::TopicView.prepend DiscourseJournal::TopicViewExtension
