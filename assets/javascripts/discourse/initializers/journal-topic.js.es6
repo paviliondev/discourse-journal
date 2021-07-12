@@ -75,13 +75,16 @@ export default {
       api.reopenWidget("timeline-scrollarea", {
         html(attrs, state) {
           const result = this._super(attrs, state);
-          const position = this.position();
 
-          result.push(
-            this.attach("timeline-entries",
-              deepMerge(position, attrs)
-            )
-          );
+          if (siteSettings.journal_entries_timeline) {
+            const position = this.position();
+
+            result.push(
+              this.attach("timeline-entries",
+                deepMerge(position, attrs)
+              )
+            );
+          }
 
           return result;
         }

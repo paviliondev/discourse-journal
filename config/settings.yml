@@ -11,3 +11,6 @@ plugins:
   journal_allow_any_author:
     type: category_list
     default: ""
+  journal_entries_timeline:
+    default: true
+    client: true
