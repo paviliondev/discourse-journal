@@ -2,7 +2,11 @@ en:
   js:
     category:
       journal_settings_label: "Journal"
-      enable_journal: "Make all topics journals"
+      enable_journal: "Enable journaling in this category"
+      update_sort_order:
+        label: "Update post sort order"
+        description: "If journaling is enabled topics will be ordered as a journal. If journaling is disabled topics will be ordered normally."
+        button: "Update"
       journal_authors: "Journal authors"
       add_journal_authors: "Select author groups"
 

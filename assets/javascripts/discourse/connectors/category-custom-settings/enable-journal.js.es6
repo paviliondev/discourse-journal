@@ -1,22 +1,27 @@
+import { ajax } from "discourse/lib/ajax";
+
 export default {
   setupComponent(attrs, component) {
-    if (!attrs.category.custom_fields) {
-      attrs.category.custom_fields = {};
+    const category = attrs.category;
+
+    if (!category.custom_fields) {
+      category.custom_fields = {};
     }
 
-    if (!attrs.category.custom_fields.journal_author_groups) {
-      attrs.category.custom_fields.journal_author_groups = "";
+    if (!category.custom_fields.journal_author_groups) {
+      category.custom_fields.journal_author_groups = "";
     }
 
     const site = component.get("site");
     const siteGroups = this.site.groups;
-    const authorGroups = attrs.category.custom_fields.journal_author_groups
+    const authorGroups = category.custom_fields.journal_author_groups
       .split("|")
       .filter(a => a.length != "");
 
     this.setProperties({
       authorGroups,
-      siteGroups
+      siteGroups,
+      categoryId: category.id
     });
   },
 
@@ -26,6 +31,33 @@ export default {
         authorGroups,
         "category.custom_fields.journal_author_groups": authorGroups.join('|')
       });
+    },
+
+    updateSortOrder() {
+      this.set('updatingSortOrder', true);
+
+      ajax('/journal//update-sort-order', {
+        type: "POST",
+        data: {
+          category_id: this.categoryId
+        }
+      }).then(result => {
+        let syncResultIcon = result.success ? "check" : "times";
+
+        this.setProperties({
+          updatingSortOrder: false,
+          syncResultIcon
+        });
+      }).catch(() => {
+        this.setProperties({
+          syncResultIcon: 'times',
+          updatingSortOrder: false
+        });
+      }).finally(() => {
+        setTimeout(() => {
+          this.set('syncResultIcon', null);
+        }, 6000);
+      })
     }
   }
 };

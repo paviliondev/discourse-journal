@@ -16,6 +16,7 @@
     <label for="category-journal-authors">
       {{i18n "category.journal_authors"}}
     </label>
+
     {{group-chooser
       content=siteGroups
       value=authorGroups
@@ -23,5 +24,26 @@
       labelProperty="name"
       onChange=(action "onSelectAuthorGroup")
     }}
+  </section>
+
+  <section class="field">
+    <h4 for="category-journal-update-sort-order">
+      {{i18n "category.update_sort_order.label"}}
+    </h4>
+
+    <p>{{i18n 'category.update_sort_order.description'}}</p>
+
+    {{d-button
+      label="category.update_sort_order.button"
+      action="updateSortOrder"
+      icon="sync"}}
+
+    {{#if syncResultIcon}}
+      {{d-icon syncResultIcon}}
+    {{else}}
+      {{conditional-loading-spinner
+        condition=updatingSortOrder
+        size="small"}}
+    {{/if}}
   </section>
 </section>

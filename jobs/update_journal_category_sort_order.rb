@@ -7,7 +7,7 @@ module Jobs
       return if category.blank?
 
       Topic.where(category_id: category.id).each do |topic|
-        if topic.journal
+        if topic.journal?
           topic.journal_update_sort_order
         else
           topic.posts.each do |post|

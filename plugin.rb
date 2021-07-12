@@ -15,6 +15,8 @@ register_asset "stylesheets/mobile/journal.scss", :mobile
 after_initialize do
   %w(
     ../lib/journal/engine.rb
+    ../app/controllers/discourse_journal/journal_controller.rb
+    ../config/routes.rb
     ../extensions/category_custom_field.rb
     ../extensions/guardian.rb
     ../extensions/post_creator.rb
