@@ -10,6 +10,7 @@ module DiscourseJournal
       @entries = nil
       @comments = nil
       @journal_author = nil
+      @journal_post_map = nil
       super(options)
     end
 
@@ -19,14 +20,6 @@ module DiscourseJournal
           .where(reply_to_post_number: nil)
           .order('created_at ASC')
       end
-    end
-
-    def first_entry
-      posts
-        .where(reply_to_post_number: nil)
-        .where.not(post_number: 1)
-        .order('sort_order')
-        .first
     end
 
     def comments
@@ -45,76 +38,80 @@ module DiscourseJournal
       comments.count
     end
 
-    def last_entry_at
-      return unless entries.any?
-
-      entries.last[:created_at]
-    end
-
-    def last_commented_on
-      return unless comments.any?
-
-      comments.last[:created_at]
-    end
-
-    def last_entry_post_number
-      return unless entries.any?
-
-      entries.last[:post_number]
-    end
-
-    def journal
-      Topic.journal_enabled(self)
-    end
-    
     def journal_author
       return unless entries.any?
-      @journaler ||= User.find(entries.last[:user_id])
+      @journal_author ||= User.find(entries.last[:user_id])
+    end
+
+    def journal?
+      return false unless SiteSetting.journal_enabled
+      return false if is_category_topic?
+      category.present? && category.journal?
+    end
+
+    def journal_post_map
+      @journal_post_map ||= begin
+        map = {}
+        post_number = 1
+
+        entries.with_deleted.each do |entry|
+          map[entry.id] = [post_number]
+
+          self.class.gather_replies(entry)
+            .sort_by(&:created_at)
+            .each do |reply|
+              post_number += 1
+              map[reply.id] = [post_number, entry.id]
+            end
+
+          post_number += 1
+        end
+
+        map
+      end
+    end
+
+    def journal_update_sort_order
+      return unless SiteSetting.journal_enabled
+
+      post_map_values = journal_post_map.map do |post_id, attrs|
+        "(#{post_id}::int,#{attrs.first}::int)"
+      end.join(",")
+
+      Post.transaction do
+        DB.exec <<~SQL
+          WITH ordered_posts (id, new_sort_order) AS (
+            VALUES #{post_map_values}
+          )
+          UPDATE
+            posts as p
+          SET
+            sort_order = o.new_sort_order
+          FROM
+            ordered_posts AS o
+          WHERE
+            p.id = o.id AND
+            p.topic_id = #{self.id}
+        SQL
+      end
     end
 
     module ClassMethods
+      def gather_replies(post, replies = [])
+        post_replies = Post.with_deleted.where(
+          topic_id: post.topic_id,
+          reply_to_post_number: post.post_number
+        )
 
-      def journal_enabled(topic)
-        return false unless SiteSetting.journal_enabled
-        return false if !topic || topic&.is_category_topic?
+        return [] if post_replies.empty?
 
-        topic.category.present? && topic.category.journal
-      end
-
-      def journal_update_post_order(topic_id)
-        return unless SiteSetting.journal_enabled
-
-        posts = Post.where(topic_id: topic_id)
-        first_post = posts.find_by(post_number: 1)
-        first_post.update(sort_order: 1)
-
-        count = 2
-
-        first_post.comments.each do |comment|
-          comment.update(sort_order: count)
-          count += 1
+        post_replies.each do |reply|
+          replies << reply
+          replies_to_reply = gather_replies(reply)
+          replies += replies_to_reply if replies_to_reply.any?
         end
 
-        entries = begin
-          posts
-            .where(reply_to_post_number: nil)
-            .where.not(post_number: 1)
-            .order("post_number ASC")
-        end
-
-        entries.each do |entry|
-          entry.update(sort_order: count)
-
-          comments = entry.comments
-          if comments.any?
-            comments.each do |comment|
-              count += 1
-              comment.update(sort_order: count)
-            end
-          end
-
-          count += 1
-        end
+        return replies
       end
     end
   end

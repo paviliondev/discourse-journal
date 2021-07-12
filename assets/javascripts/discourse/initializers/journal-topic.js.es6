@@ -5,13 +5,16 @@ import { dateNode, numberNode } from "discourse/helpers/node";
 import { withPluginApi } from "discourse/lib/plugin-api";
 import { scheduleOnce } from "@ember/runloop";
 import { h } from "virtual-dom";
+import { deepMerge } from "discourse-common/lib/object";
 
 export default {
   name: "journal-topic",
   initialize(container) {
     const siteSettings = container.lookup("site-settings:main");
-    if (!siteSettings.journal_enabled) return;
-  
+    if (!siteSettings.journal_enabled) {
+      return;
+    }
+
     withPluginApi("0.8.12", api => {
       api.modifyClass('route:topic', {
         isJournal() {
@@ -24,6 +27,7 @@ export default {
           didTransition() {
             if (this.isJournal()) {
               KeyboardShortcuts.pause(["c"]);
+              $("body").addClass("topic-journal");
             }
             return this._super(...arguments);
           },
@@ -31,6 +35,7 @@ export default {
           willTransition() {
             if (this.isJournal()) {
               KeyboardShortcuts.unpause(["c"]);
+              $("body").removeClass("topic-journal");
             }
             return this._super(...arguments);
           },
@@ -42,7 +47,7 @@ export default {
         showJournalTip(journalEnabled) {
           return journalEnabled && siteSettings.journal_show_topic_tip;
         },
-  
+
         @discourseComputed("highest_post_number", "url", "last_entry_post_number")
         lastPostUrl(highestPostNumber, url, lastEntryPostNumber) {
           return lastEntryPostNumber ?
@@ -54,6 +59,7 @@ export default {
       api.modifyClass("component:topic-footer-buttons", {
         didInsertElement() {
           this._super(...arguments);
+
           const journalEnabled = this.get("topic.journal");
           if (journalEnabled) {
             scheduleOnce("afterRender", () => {
@@ -66,16 +72,30 @@ export default {
         }
       });
 
-      api.reopenWidget('topic-timeline', {
-        position() {
-          const position = this._super();
-          if (topic.journal) {
-            position.lastRead = null;
-            position.last_read_post_number = null;
-          }
-          return position;
+      api.reopenWidget("timeline-scrollarea", {
+        html(attrs, state) {
+          const result = this._super(attrs, state);
+          const position = this.position();
+
+          result.push(
+            this.attach("timeline-entries",
+              deepMerge(position, attrs)
+            )
+          );
+
+          return result;
         }
       });
+
+      api.reopenWidget("timeline-last-read", {
+        html(attrs) {
+          if (attrs.journal) {
+            return '';
+          } else {
+            return this._super(...arguments);
+          }
+        }
+      })
 
       api.modifyClass("component:topic-progress", {
         @discourseComputed(

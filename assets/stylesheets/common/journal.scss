@@ -7,17 +7,78 @@ body.journal-category {
   }
 }
 
-.topic-journal-page {
-  .time-gap {
+.topic-journal {
+  .time-gap,
+  nav.post-controls .show-replies,
+  .topic-timeline .reply-to-post,
+  .topic-timeline .timeline-ago,
+  .topic-timeline .back-button,
+  .topic-timeline .timeline-last-read {
     display: none;
   }
 
-  nav.post-controls .show-replies {
-    display: none;
+  .topic-timeline .timeline-entries {
+    position: absolute;
+    top: 0;
+    height: inherit;
+    left: -40px;
+
+    .entries-title {
+      position: absolute;
+      top: -30px;
+      left: -50px;
+      color: var(--primary-med-or-secondary-med);
+
+      span {
+        white-space: nowrap;
+      }
+    }
+
+    .entry-list {
+      height: 100%;
+    }
   }
 
-  .topic-timeline .reply-to-post {
-    display: none;
+  .topic-timeline .entry-marker {
+    position: absolute;
+    width: 15px;
+    cursor: pointer;
+    box-sizing: border-box;
+    border: 1px solid var(--primary-low);
+
+    &.active,
+    &:hover {
+      border: 1px solid var(--tertiary-high);
+      z-index: 1;
+    }
+
+    &.active {
+      background-color: var(--tertiary-high);
+    }
+
+    span {
+      position: absolute;
+      top: -10px;
+      left: -25px;
+    }
+  }
+
+  .timeline-container.timeline-fullscreen .topic-timeline {
+    .post-excerpt {
+      width: 600px;
+    }
+
+    .timeline-entries {
+      left: -60px;
+
+      .entries-title {
+        display: none;
+      }
+    }
+  }
+
+  .topic-body .reply-to-tab {
+    cursor: initial;
   }
 }
 

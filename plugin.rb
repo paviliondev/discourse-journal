@@ -2,7 +2,7 @@
 
 # name: discourse-journal
 # about: Create journals in discourse
-# version: 0.1.0
+# version: 0.2.0
 # authors: Angus McLeod
 # url: https://github.com/paviliondev/discourse-journal
 
@@ -19,36 +19,64 @@ after_initialize do
     ../extensions/guardian.rb
     ../extensions/post_creator.rb
     ../extensions/topic.rb
-    ../extensions/topic_list_item_serializer.rb
-    ../extensions/topic_view.rb
-    ../extensions/topic_view_serializer.rb
-    ../jobs/update_category_post_order.rb
+    ../jobs/update_journal_category_sort_order.rb
   ).each do |path|
     load File.expand_path(path, __FILE__)
   end
 
+  ::Guardian.prepend DiscourseJournal::GuardianExtension
+  ::Topic.include DiscourseJournal::TopicExtension
+  ::CategoryCustomField.include DiscourseJournal::CategoryCustomFieldExtension
+
   register_category_custom_field_type("journal", :boolean)
-  add_to_class(:category, :journal) do
-    ActiveModel::Type::Boolean.new.cast(custom_fields["journal"])
-  end
-  add_to_class(:category, :journal_author_groups) do
+  register_category_custom_field_type("journal_author_groups", :string)
+  add_to_class(:category, :journal?) { ActiveModel::Type::Boolean.new.cast(custom_fields["journal"]) }
+  add_to_class(:category, :journal_author_groups) {
     if custom_fields["journal_author_groups"].present?
       custom_fields["journal_author_groups"].split("|")
     else
       []
     end
-  end
+  }
+
+  add_to_class(:post, :journal?) { topic.journal? }
+  add_to_class(:post, :entry?) { journal? && topic.journal_post_map[id]&.second.blank? }
+  add_to_class(:post, :comment?) { journal? && topic.journal_post_map[id]&.second.present? }
+  add_to_class(:post, :entry_post_id) { entry? ? id : topic.journal_post_map[id]&.second }
+
   Site.preloaded_category_custom_fields << "journal"
   Site.preloaded_category_custom_fields << "journal_author_groups"
+  add_to_serializer(:basic_category, :journal) { object.journal? }
+  add_to_serializer(:basic_category, :journal_author_groups, false) { object.journal_author_groups }
+  add_to_serializer(:basic_category, :include_journal_author_groups?) { SiteSetting.journal_enabled && object.journal? }
 
-  add_to_serializer(:basic_category, :journal) { object.journal }
-  add_to_serializer(:basic_category, :journal_author_groups) { object.journal_author_groups }
-  add_to_serializer(:post, :journal) { object.topic.journal }
+  add_to_serializer(:post, :journal) { object.journal? }
+  add_to_serializer(:post, :entry, false) { object.entry? }
+  add_to_serializer(:post, :include_entry?) { SiteSetting.journal_enabled && object.journal? }
+  add_to_serializer(:post, :comment, false) { object.comment? }
+  add_to_serializer(:post, :include_comment?) { SiteSetting.journal_enabled && object.journal? }
+  add_to_serializer(:post, :entry_post_id) { object.entry_post_id }
+  add_to_serializer(:post, :include_entry_post_id?) { SiteSetting.journal_enabled && object.journal? }
 
-  ::Guardian.prepend DiscourseJournal::GuardianExtension
-  ::Topic.include DiscourseJournal::TopicExtension
-  ::TopicView.prepend DiscourseJournal::TopicViewExtension
-  ::TopicViewSerializer.include DiscourseJournal::TopicViewSerializerExtension
-  ::TopicListItemSerializer.include DiscourseJournal::TopicListItemSerializerExtension
-  ::CategoryCustomField.include DiscourseJournal::CategoryCustomFieldExtension
+  add_to_serializer(:topic_view, :journal) { object.topic.journal? }
+  add_to_serializer(:topic_view, :journal_author, false) { BasicUserSerializer.new(object.topic.journal_author, scope: scope, root: false) }
+  add_to_serializer(:topic_view, :include_journal_author?) { SiteSetting.journal_enabled && object.topic.journal? }
+  add_to_serializer(:topic_view, :entry_count) { object.topic.entry_count }
+  add_to_serializer(:topic_view, :include_entry_count?) { SiteSetting.journal_enabled && object.topic.journal? }
+  add_to_serializer(:topic_view, :comment_count) { object.topic.comment_count }
+  add_to_serializer(:topic_view, :include_comment_count?) { SiteSetting.journal_enabled && object.topic.journal? }
+  add_to_serializer(:topic_view, :entry_post_ids) { object.topic.entries.map(&:id) }
+  add_to_serializer(:topic_view, :include_entry_post_ids?) { SiteSetting.journal_enabled && object.topic.journal? }
+  add_to_serializer(:topic_view, :last_entry_post_number) { object.topic.entries.last.post_number }
+  add_to_serializer(:topic_view, :include_last_entry_post_number?) { SiteSetting.journal_enabled && object.topic.journal? }
+  add_to_serializer(:topic_view, :can_create_entry) { scope&.user && scope.can_create_entry_on_topic?(object.topic) }
+  add_to_serializer(:topic_view, :include_can_create_entry?) { SiteSetting.journal_enabled && object.topic.journal? }
+
+  add_to_serializer(:topic_list_item, :journal) { object.journal? }
+  add_to_serializer(:topic_list_item, :entry_count, false) { object.entry_count }
+  add_to_serializer(:topic_list_item, :entry_count) { SiteSetting.journal_enabled && object.journal? }
+
+  on(:post_created) do |post, opts, user|
+    post.topic.journal_update_sort_order if post.topic&.journal?
+  end
 end

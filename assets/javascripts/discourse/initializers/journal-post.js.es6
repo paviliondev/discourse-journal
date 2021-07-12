@@ -22,9 +22,9 @@ export default {
         "reply_to_post_number",
         "comment",
         "showComment",
-        "entryId",
-        "topicUserId",
-        "entry_count"
+        "entry",
+        "entry_post_id",
+        "entry_post_ids"
       );
 
       api.reopenWidget("post-menu", {
@@ -48,7 +48,7 @@ export default {
 
           return helper.attach("link", {
             action: "showComments",
-            actionParam: model.entryId,
+            actionParam: model.entry_post_id,
             rawLabel: I18n.t(`topic.comment.show_comments.${type}`, {
               count: model.hiddenComments
             }),
@@ -123,7 +123,6 @@ export default {
           let postArray = this.capabilities.isAndroid ? posts : posts.toArray();
 
           if (postArray[0] && postArray[0].journal) {
-            let entryId = null;
             let showComments = state.showComments;
             let defaultComments = Number(siteSettings.journal_comments_default);
             let commentCount = 0;
@@ -134,30 +133,25 @@ export default {
                 return;
               }
 
-              if (p.reply_to_post_number) {
+              if (p.comment) {
                 commentCount++;
-                p["comment"] = true;
-                p["showComment"] =
-                  showComments.indexOf(entryId) > -1 ||
-                  commentCount <= defaultComments;
-                p["entryId"] = entryId;
+                let showingComments = showComments.indexOf(p.entry_post_id) > -1;
+                let shownByDefault = commentCount <= defaultComments;
+
+                p["showComment"] = showingComments || shownByDefault;
                 p["attachCommentToggle"] = false;
 
-                if (p["showComment"]) lastVisible = i;
-
-                if (
-                  (!postArray[i + 1] || !postArray[i + 1].reply_to_post_number) &&
-                  !p["showComment"]
-                ) {
-                  postArray[lastVisible]["entryId"] = entryId;
-                  postArray[lastVisible]["attachCommentToggle"] = true;
-                  postArray[lastVisible]["hiddenComments"] =
-                    commentCount - defaultComments;
+                if (p["showComment"]) {
+                  lastVisible = i;
                 }
-              } else {
+
+                if ((!postArray[i + 1] || postArray[i + 1].entry) && !p["showComment"]) {
+                  postArray[lastVisible]["attachCommentToggle"] = true;
+                  postArray[lastVisible]["hiddenComments"] = commentCount - defaultComments;
+                }
+              } else { 
                 p["attachCommentToggle"] = false;
-                p["topicUserId"] = p.topic.user_id;
-                entryId = p.id;
+
                 commentCount = 0;
                 lastVisible = i;
               }
@@ -179,78 +173,6 @@ export default {
 
       api.modifyClass("model:post-stream", {
         journal: alias('topic.journal'),
-
-        arrayEqual(arr1, arr2) {
-          return JSON.stringify(arr1) === JSON.stringify(arr2);
-        },
-
-        @discourseComputed('posts.[]', 'stream.[]')
-        entries(posts, stream) {
-          return posts.filter(p => !p.reply_to_post_number);
-        },
-
-        @observes('entries.[]')
-        modifyStream() {
-          const stream = this.stream;
-          const entryIds = this.entries.map(p => p.id);
-          const journal = this.journal;
-
-          if (journal && !this.arrayEqual(entryIds, stream)) {
-            this.set('stream', entryIds);
-          }
-        },
-
-        @discourseComputed(
-          "isMegaTopic",
-          "stream.length",
-          "topic.highest_post_number",
-          "journal"
-        )
-        filteredPostsCount(isMegaTopic, streamLength, topicHighestPostNumber, journal) {
-          return journal ? this.entries.length : this._super(...arguments);
-        },
-
-        closestPostForPostNumber(postNumber) {
-          if (!this.hasPosts) {
-            return;
-          }
-
-          if (this.journal) {
-            let closest = null;
-            this.entries.forEach((p) => {
-              if (!closest) {
-                closest = p;
-                return;
-              }
-
-              if (
-                Math.abs(postNumber - p.get("post_number")) <
-                Math.abs(closest.get("post_number") - postNumber)
-              ) {
-                closest = p;
-              }
-            });
-
-            return closest;
-          } else {
-            return this._super(...arguments);
-          }
-        },
-
-        progressIndexOfPostId(post) {
-          if (this.journal) {
-            let replyToPostNumber = post.get("reply_to_post_number");
-
-            while (replyToPostNumber) {
-              post = this.postForPostNumber(replyToPostNumber);
-              replyToPostNumber = post.get("reply_to_post_number");
-            }
-
-            return post.get("post_number");
-          } else {
-            return this._super(...arguments);
-          }
-        },
 
         prependPost(post) {
           if (!this.journal) return this._super(...arguments);
@@ -313,22 +235,13 @@ export default {
         }
       });
 
-      api.reopenWidget("timeline-last-read", {
-        html(attrs) {
-          if (this.parentWidget.attrs.topic && this.parentWidget.attrs.topic.journal) {
-            return null;
-          } else {
-            return this._super(...arguments);
-          }
-        },
-      });
-
       api.reopenWidget("post-avatar", {
         html(attrs) {
-          const journalEnabled = attrs.topic.journal;
-          if (!journalEnabled) return this._super(...arguments);
+          if (!attrs.topic.journal) {
+            return this._super(...arguments);
+          }
 
-          if (attrs.reply_to_post_number) {
+          if (attrs.comment) {
             this.settings.size = "small";
           } else {
             this.settings.size = "large";
@@ -340,17 +253,21 @@ export default {
 
       api.reopenWidget("post", {
         html(attrs) {
-          const journalEnabled = attrs.topic.journal;
-          if (!journalEnabled) return this._super(...arguments);
+          if (!attrs.topic.journal) {
+            return this._super(...arguments);
+          }
 
           if (attrs.cloaked) {
             return "";
           }
 
-          if (attrs.journal && !attrs.firstPost) {
-            attrs.replyToUsername = null;
-            
-            if (!attrs.reply_to_post_number) {
+          if ( attrs.topic.journal) {
+
+            if (attrs.entry) {
+              attrs.replyToUsername = null;
+            }
+
+            if (attrs.comment) {
               attrs.replyCount = null;
             }
           }
@@ -359,7 +276,7 @@ export default {
         },
 
         openCommentCompose() {
-          this.sendWidgetAction("showComments", this.attrs.entryId);
+          this.sendWidgetAction("showComments", this.attrs.entry_post_id);
           this.sendWidgetAction("replyToPost", this.model).then(() => {
             next(this, () => {
               const composer = api.container.lookup("controller:composer");
@@ -371,6 +288,18 @@ export default {
           });
         }
       });
+
+      api.reopenWidget("reply-to-tab", {
+        title: "in_reply_to",
+
+        click() {
+          if (this.attrs.journal) {
+            return false;
+          } else {
+            return this._super(...arguments);
+          }
+        },
+      })
     });
   }
 };

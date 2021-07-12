@@ -1,11 +1,5 @@
-{{#if topic.journal}}
-  {{d-section
-    pageClass="topic-journal"
-    scrollTop=false}}
-  
-  {{#if topic.showJournalTip}}
-    {{journal-topic-tip
-      label="topic.tip.journal.title"
-      details="topic.tip.journal.details"}}
-  {{/if}}
+{{#if topic.showJournalTip}}
+  {{journal-topic-tip
+    label="topic.tip.journal.title"
+    details="topic.tip.journal.details"}}
 {{/if}}

@@ -11,11 +11,7 @@ module DiscourseJournal
     end
 
     def can_create_entry_on_topic?(topic)
-      journal?(topic) && (user_in_author_groups(topic) || user_created_topic(topic))
-    end
-
-    def journal?(topic)
-      topic&.category&.journal
+      topic&.journal? && (user_in_author_groups(topic) || user_created_topic(topic))
     end
 
     def post_is_journal_entry?(post)
@@ -27,7 +23,7 @@ module DiscourseJournal
     end
 
     def can_wiki?(post)
-      !journal?(post&.topic) && super
+      !post&.topic&.journal? && super
     end
 
     def user_in_author_groups(topic)

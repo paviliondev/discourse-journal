@@ -34,6 +34,7 @@ en:
     comment_lowercase:
       one: comment
       other: comments
+    in_reply_to: In reply to
       
     topic:
       create_journal: 
@@ -41,6 +42,7 @@ en:
       entry:
         title: "New Entry"
         help: "begin composing a new entry"
+        jump_to: "Jump to entry %{entryNumber}"
       comment:
         title: 'Comment'
         help: 'begin composing a comment on this entry'
