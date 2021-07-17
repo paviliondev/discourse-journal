@@ -76,7 +76,7 @@ export default {
         html(attrs, state) {
           const result = this._super(attrs, state);
 
-          if (siteSettings.journal_entries_timeline) {
+          if (siteSettings.journal_entries_timeline && attrs.topic.journal) {
             const position = this.position();
 
             result.push(
