@@ -18,7 +18,6 @@ export default {
 
       api.includePostAttributes(
         "journal",
-        "topic",
         "reply_to_post_number",
         "comment",
         "showComment",
@@ -58,7 +57,7 @@ export default {
       });
 
       api.addPostClassesCallback(attrs => {
-        if (attrs.topic.journal && !attrs.firstPost) {
+        if (attrs.journal && !attrs.firstPost) {
           if (attrs.comment) {
             let classes = ["comment"];
             if (attrs.showComment) {
@@ -94,11 +93,17 @@ export default {
       api.reopenWidget("post-stream", {
         buildKey: () => "post-stream",
 
+        firstPost() {
+          return this.attrs.posts.toArray()[0];
+        },
+
         defaultState(attrs, state) {
           let defaultState = this._super(attrs, state);
 
-          const journalEnabled = attrs.posts.toArray()[0].topic.journal;
-          if (!journalEnabled) return defaultState;
+          const firstPost = this.firstPost();
+          if (!firstPost || !firstPost.journal) {
+            return defaultState;
+          }
 
           defaultState["showComments"] = [];
 
@@ -116,8 +121,10 @@ export default {
         },
 
         html(attrs, state) {
-          const journalEnabled = attrs.posts.toArray()[0].topic.journal;
-          if (!journalEnabled) return this._super(...arguments);
+          const firstPost = this.firstPost();
+          if (!firstPost || !firstPost.journal) {
+            return this._super(...arguments);
+          }
 
           let posts = attrs.posts || [];
           let postArray = this.capabilities.isAndroid ? posts : posts.toArray();
@@ -202,10 +209,9 @@ export default {
 
             if (!posts.includes(stored)) {
               const replyingTo = post.get("reply_to_post_number");
-              const journalEnabled = this.get("topic.journal");
               let insertPost = () => posts.pushObject(stored);
 
-              if (journalEnabled && replyingTo) {
+              if (post.journal && replyingTo) {
                 let passed = false;
                 posts.some((p, i) => {
                   if (passed && !p.reply_to_post_number) {
@@ -237,7 +243,7 @@ export default {
 
       api.reopenWidget("post-avatar", {
         html(attrs) {
-          if (!attrs || !attrs.topic || !attrs.topic.journal) {
+          if (!attrs || !attrs.journal) {
             return this._super(...arguments);
           }
 
@@ -253,7 +259,7 @@ export default {
 
       api.reopenWidget("post", {
         html(attrs) {
-          if (!attrs.topic.journal) {
+          if (!attrs.journal) {
             return this._super(...arguments);
           }
 
@@ -261,15 +267,12 @@ export default {
             return "";
           }
 
-          if ( attrs.topic.journal) {
+          if (attrs.entry) {
+            attrs.replyToUsername = null;
+          }
 
-            if (attrs.entry) {
-              attrs.replyToUsername = null;
-            }
-
-            if (attrs.comment) {
-              attrs.replyCount = null;
-            }
+          if (attrs.comment) {
+            attrs.replyCount = null;
           }
 
           return this.attach("post-article", attrs);

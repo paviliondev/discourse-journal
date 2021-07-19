@@ -139,7 +139,8 @@ export default {
 
         journalMap(attrs, state) {
           const contents = [];
-          const topic = attrs.topic;
+          const post = this.findAncestorModel();
+          const topic = post.topic;
 
           contents.push(
             h("li", [
