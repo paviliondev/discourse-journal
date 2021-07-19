@@ -237,7 +237,7 @@ export default {
 
       api.reopenWidget("post-avatar", {
         html(attrs) {
-          if (!attrs.topic.journal) {
+          if (!attrs || !attrs.topic || !attrs.topic.journal) {
             return this._super(...arguments);
           }
 
@@ -247,7 +247,7 @@ export default {
             this.settings.size = "large";
           }
 
-          return this._super(attrs);
+          return this._super(...arguments);
         }
       });
 
