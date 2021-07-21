@@ -93,14 +93,17 @@ export default {
 
       api.modifyClass('component:scrolling-post-stream', {
         showComments: [],
+
         didInsertElement() {
           this._super(...arguments);
           this.appEvents.on("composer:opened", this, () => {
             const composer = getOwner(this).lookup("controller:composer");
             const post = composer.get('model.post');
+            
             if (post && post.entry) {
               this.set('showComments', [post.id]);
-            } 
+            }
+
             this._refresh({ force: true });
           });
         },
@@ -210,19 +213,69 @@ export default {
       api.modifyClass("model:post-stream", {
         journal: alias('topic.journal'),
 
+        getCommentIndex(post) {
+          const posts = this.get("posts");
+          let passed = false;
+          let commentIndex = null;
+
+          posts.some((p, i) => {
+            if (passed && !p.reply_to_post_number) {
+              commentIndex = i;
+              return true;
+            }
+            if (p.post_number == post.reply_to_post_number && (i < posts.length - 1)) {
+              passed = true;
+            }
+          });
+
+          return commentIndex;
+        },
+
+        insertCommentInStream(post) {
+          const stream = this.stream;
+          const postId = post.get("id");
+          const commentIndex = this.getCommentIndex(post) - 1;
+
+          if (stream.indexOf(postId) > -1 && commentIndex && commentIndex > 0) {
+            stream.removeObject(postId);
+            stream.insertAt(commentIndex, postId);
+          }
+        },
+
+        stagePost(post, user) {
+          let result = this._super(...arguments);
+          if (!this.journal) return result;
+
+          if (post.get("reply_to_post_number")) {
+            this.insertCommentInStream(post);
+          }
+
+          return result;
+        },
+
+        commitPost(post) {
+          let result = this._super(...arguments);
+          if (!this.journal) return result;
+
+          if (post.get("reply_to_post_number")) {
+            this.insertCommentInStream(post);
+          }
+
+          return result;
+        },
+
         prependPost(post) {
           if (!this.journal) return this._super(...arguments);
 
           const stored = this.storePost(post);
           if (stored) {
             const posts = this.get("posts");
-            let insertPost = () => posts.unshiftObject(stored);
 
             if (post.post_number === 2 && posts[0].post_number === 1) {
-              insertPost = () => posts.insertAt(1, stored);
+              posts.insertAt(1, stored);
+            } else {
+              posts.unshiftObject(stored)
             }
-
-            insertPost();
           }
 
           return post;
@@ -232,26 +285,18 @@ export default {
           if (!this.journal) return this._super(...arguments);
 
           const stored = this.storePost(post);
-
           if (stored) {
             const posts = this.get("posts");
 
             if (!posts.includes(stored)) {
-              const replyingTo = post.get("reply_to_post_number");
               let insertPost = () => posts.pushObject(stored);
 
-              if (replyingTo) {
-                let passed = false;
-                posts.some((p, i) => {
-                  if (passed && !p.reply_to_post_number) {
-                    insertPost = () => posts.insertAt(i, stored);
-                    return true;
-                  }
+              if (post.get("reply_to_post_number")) {
+                const commentIndex = this.getCommentIndex(post);
 
-                  if (p.post_number === replyingTo && i < posts.length - 1) {
-                    passed = true;
-                  }
-                });
+                if (commentIndex && commentIndex > 0) {
+                  insertPost = () => posts.insertAt(commentIndex, stored);
+                }
               }
 
               if (!this.get("loadingBelow")) {
