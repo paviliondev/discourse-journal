@@ -48,7 +48,7 @@ export default {
     withPluginApi("0.8.12", api => {
       api.modifyClass('controller:composer', {
         open(opts) {
-          if (opts.topic && opts.topic.journal && !opts.post) {
+          if (opts.topic && opts.topic.journal && opts.quote && !opts.post) {
             opts.post = opts.topic.postStream.posts[0];
           }
           return this._super(opts);
