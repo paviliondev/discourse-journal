@@ -76,7 +76,7 @@ after_initialize do
 
   add_to_serializer(:topic_list_item, :journal) { object.journal? }
   add_to_serializer(:topic_list_item, :entry_count, false) { object.entry_count }
-  add_to_serializer(:topic_list_item, :entry_count) { SiteSetting.journal_enabled && object.journal? }
+  add_to_serializer(:topic_list_item, :include_entry_count?) { SiteSetting.journal_enabled && object.journal? }
 
   on(:post_created) do |post, opts, user|
     post.topic.journal_update_sort_order if post.topic&.journal?

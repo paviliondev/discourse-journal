@@ -211,7 +211,7 @@ export default {
               const replyingTo = post.get("reply_to_post_number");
               let insertPost = () => posts.pushObject(stored);
 
-              if (post.journal && replyingTo) {
+              if (replyingTo) {
                 let passed = false;
                 posts.some((p, i) => {
                   if (passed && !p.reply_to_post_number) {
