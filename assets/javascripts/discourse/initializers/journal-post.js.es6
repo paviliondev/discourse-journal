@@ -4,6 +4,7 @@ import { withPluginApi } from "discourse/lib/plugin-api";
 import { h } from "virtual-dom";
 import { next, once } from "@ember/runloop";
 import { alias } from "@ember/object/computed";
+import { getOwner } from "discourse-common/lib/get-owner";
 
 export default {
   name: "journal-post",
@@ -90,6 +91,30 @@ export default {
         }
       });
 
+      api.modifyClass('component:scrolling-post-stream', {
+        showComments: [],
+        didInsertElement() {
+          this._super(...arguments);
+          this.appEvents.on("composer:opened", this, () => {
+            const composer = getOwner(this).lookup("controller:composer");
+            const post = composer.get('model.post');
+            if (post && post.entry) {
+              this.set('showComments', [post.id]);
+            } 
+            this._refresh({ force: true });
+          });
+        },
+
+        buildArgs() {
+          return Object.assign(
+            this._super(...arguments),
+            this.getProperties(
+              'showComments'
+            )
+          )
+        }
+      });
+
       api.reopenWidget("post-stream", {
         buildKey: () => "post-stream",
 
@@ -104,8 +129,7 @@ export default {
           if (!firstPost || !firstPost.journal) {
             return defaultState;
           }
-
-          defaultState["showComments"] = [];
+          defaultState["showComments"] = attrs.showComments;
 
           return defaultState;
         },
@@ -126,52 +150,57 @@ export default {
             return this._super(...arguments);
           }
 
-          let posts = attrs.posts || [];
-          let postArray = this.capabilities.isAndroid ? posts : posts.toArray();
-
-          if (postArray[0] && postArray[0].journal) {
-            let showComments = state.showComments;
-            let defaultComments = Number(siteSettings.journal_comments_default);
-            let commentCount = 0;
-            let lastVisible = null;
-
-            postArray.forEach((p, i) => {
-              if (!p.topic) {
-                return;
-              }
-
-              if (p.comment) {
-                commentCount++;
-                let showingComments = showComments.indexOf(p.entry_post_id) > -1;
-                let shownByDefault = commentCount <= defaultComments;
-
-                p["showComment"] = showingComments || shownByDefault;
-                p["attachCommentToggle"] = false;
-
-                if (p["showComment"]) {
-                  lastVisible = i;
-                }
-
-                if ((!postArray[i + 1] || postArray[i + 1].entry) && !p["showComment"]) {
-                  postArray[lastVisible]["attachCommentToggle"] = true;
-                  postArray[lastVisible]["hiddenComments"] = commentCount - defaultComments;
-                }
-              } else { 
-                p["attachCommentToggle"] = false;
-
-                commentCount = 0;
-                lastVisible = i;
+          let showComments = state.showComments;
+          if (attrs.showComments && attrs.showComments.length) {
+            attrs.showComments.forEach(postId => {
+              if (!showComments.includes(postId)) {
+                showComments.push(postId);
               }
             });
+          }
 
-            if (this.capabilities.isAndroid) {
-              attrs.posts = postArray;
-            } else {
-              attrs.posts = PostsWithPlaceholders.create({
-                posts: postArray,
-                store
-              });
+          let posts = attrs.posts || [];
+          let postArray = this.capabilities.isAndroid ? posts : posts.toArray();
+          let defaultComments = Number(siteSettings.journal_comments_default);
+          let commentCount = 0;
+          let lastVisible = null;
+
+          postArray.forEach((p, i) => {
+            if (!p.topic) {
+              return;
             }
+
+            if (p.comment) {
+              commentCount++;
+              let showingComments = showComments.indexOf(p.entry_post_id) > -1;
+              let shownByDefault = commentCount <= defaultComments;
+
+              p["showComment"] = showingComments || shownByDefault;
+              p["attachCommentToggle"] = false;
+
+              if (p["showComment"]) {
+                lastVisible = i;
+              }
+
+              if ((!postArray[i + 1] || postArray[i + 1].entry) && !p["showComment"]) {
+                postArray[lastVisible]["attachCommentToggle"] = true;
+                postArray[lastVisible]["hiddenComments"] = commentCount - defaultComments;
+              }
+            } else { 
+              p["attachCommentToggle"] = false;
+
+              commentCount = 0;
+              lastVisible = i;
+            }
+          });
+
+          if (this.capabilities.isAndroid) {
+            attrs.posts = postArray;
+          } else {
+            attrs.posts = PostsWithPlaceholders.create({
+              posts: postArray,
+              store
+            });
           }
 
           return this._super(attrs, state);
@@ -279,7 +308,6 @@ export default {
         },
 
         openCommentCompose() {
-          this.sendWidgetAction("showComments", this.attrs.entry_post_id);
           this.sendWidgetAction("replyToPost", this.model).then(() => {
             next(this, () => {
               const composer = api.container.lookup("controller:composer");

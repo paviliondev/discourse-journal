@@ -17,9 +17,9 @@ export default {
       if (action === CREATE_TOPIC) {
         key = "create_journal";
       } else if (action === REPLY && post) {
-        key = post.reply_to_post_number ? "reply_to_comment" : "create_comment";
+        key = post.comment ? "reply_to_comment" : "create_comment";
       } else if (action === EDIT && post) {
-        key = post.reply_to_post_number ? "edit_comment" : "edit_entry"
+        key = post.comment ? "edit_comment" : "edit_entry"
       } else {
         key = "create_entry";
       }
