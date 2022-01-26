@@ -1,0 +1,61 @@
+sr:
+  js:
+    category:
+      journal_settings_label: "Journal"
+      enable_journal: "Enable journaling in this category"
+      update_sort_order:
+        label: "Update post sort order"
+        description: "If journaling is enabled topics will be ordered as a journal. If journaling is disabled topics will be ordered normally."
+        button: "Update"
+      journal_authors: "Journal authors"
+      add_journal_authors: "Select author groups"
+    composer:
+      composer_actions:
+        create_journal:
+          name: Create Journal
+          description: Create a new journal
+        create_entry:
+          name: Create Entry
+          description: Create a new entry in a journal
+        edit_entry:
+          name: Edit Entry
+          description: Edit a journal entry
+        create_comment:
+          name: Comment
+          description: Comment on a journal entry
+        edit_comment:
+          name: Edit Comment
+          description: Edit comment on a journal entry
+        reply_to_comment:
+          name: Reply to Comment
+          description: Reply to comment on a journal entry
+    last_entry_lowercase: last entry
+    entry_lowercase:
+      one: entry
+      few: entries
+      other: entries
+    comment_lowercase:
+      one: comment
+      few: comments
+      other: comments
+    in_reply_to: In reply to
+    topic:
+      create_journal:
+        label: "Create Journal"
+      entry:
+        title: "New Entry"
+        help: "begin composing a new entry"
+        jump_to: "Jump to entry %{entryNumber}"
+      comment:
+        title: 'Comment'
+        help: 'begin composing a comment on this entry'
+        show_comments:
+          all: 'show {{count}} comments'
+          more: 'show {{count}} more comments'
+      comment_reply:
+        title: 'Reply'
+        help: 'reply to a comment'
+      tip:
+        journal:
+          title: "Journal"
+          details: "Only the topic author can post entries. All users can post comments."
