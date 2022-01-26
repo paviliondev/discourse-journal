@@ -1,0 +1,6 @@
+et:
+  site_settings:
+    journal_enabled: "Enable journal plugin."
+    journal_show_topic_tip: "Show a tip about journals under journal topic titles."
+    journal_comments_default: "Maximum number of comments to display on journal entries by default."
+    journal_entries_timeline: "Enable journal entries timeline."
