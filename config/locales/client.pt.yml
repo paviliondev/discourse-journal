@@ -1,33 +1,33 @@
 pt:
   js:
     category:
-      journal_settings_label: "Journal"
-      enable_journal: "Enable journaling in this category"
+      journal_settings_label: "Jornal"
+      enable_journal: "Habilitar jornais nesta categoria"
       update_sort_order:
-        label: "Update post sort order"
+        label: "Atualizar a ordem da classificação das postagens"
         description: "If journaling is enabled topics will be ordered as a journal. If journaling is disabled topics will be ordered normally."
         button: "Update"
       journal_authors: "Journal authors"
-      add_journal_authors: "Select author groups"
+      add_journal_authors: "Selecionar grupo de autores"
     composer:
       composer_actions:
         create_journal:
-          name: Create Journal
-          description: Create a new journal
+          name: Criar diário
+          description: Criar um novo diário
         create_entry:
-          name: Create Entry
+          name: Criar entrada
           description: Create a new entry in a journal
         edit_entry:
-          name: Edit Entry
+          name: Editar entrada
           description: Edit a journal entry
         create_comment:
-          name: Comment
-          description: Comment on a journal entry
+          name: Comentário
+          description: Comentar sobre a entrada do diário
         edit_comment:
-          name: Edit Comment
+          name: Editar comentário
           description: Edit comment on a journal entry
         reply_to_comment:
-          name: Reply to Comment
+          name: Responder ao comentário
           description: Reply to comment on a journal entry
     last_entry_lowercase: last entry
     entry_lowercase:
@@ -41,7 +41,7 @@ pt:
       create_journal:
         label: "Create Journal"
       entry:
-        title: "New Entry"
+        title: "Nova entrada"
         help: "begin composing a new entry"
         jump_to: "Jump to entry %{entryNumber}"
       comment:
