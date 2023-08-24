@@ -5,6 +5,7 @@ import { h } from "virtual-dom";
 import { next, once } from "@ember/runloop";
 import { alias } from "@ember/object/computed";
 import { getOwner } from "discourse-common/lib/get-owner";
+import Composer from "discourse/models/composer";
 
 export default {
   name: "journal-post",
@@ -75,7 +76,7 @@ export default {
         if (attrs.canCreatePost && attrs.journal) {
           let replyComment = attrs.reply_to_post_number;
           let i18nKey = replyComment ? 'comment_reply' : 'comment';
-          
+
           let args = {
             action: "openCommentCompose",
             title: `topic.${i18nKey}.help`,
@@ -99,7 +100,7 @@ export default {
           this.appEvents.on("composer:opened", this, () => {
             const composer = getOwner(this).lookup("controller:composer");
             const post = composer.get('model.post');
-            
+
             if (post && post.entry) {
               this.set('showComments', [post.id]);
             }
@@ -139,7 +140,7 @@ export default {
 
         showComments(entryId) {
           let showComments = this.state.showComments;
-          
+
           if (showComments.indexOf(entryId) === -1) {
             showComments.push(entryId);
             this.state.showComments = showComments;
@@ -189,7 +190,7 @@ export default {
                 postArray[lastVisible]["attachCommentToggle"] = true;
                 postArray[lastVisible]["hiddenComments"] = commentCount - defaultComments;
               }
-            } else { 
+            } else {
               p["attachCommentToggle"] = false;
 
               commentCount = 0;
@@ -353,15 +354,13 @@ export default {
         },
 
         openCommentCompose() {
-          this.sendWidgetAction("replyToPost", this.model).then(() => {
-            next(this, () => {
-              const composer = api.container.lookup("controller:composer");
-
-              if (!composer.model.post) {
-                composer.model.set("post", this.model);
-              }
-            });
-          });
+          const opts = {
+            action: Composer.REPLY,
+            draftKey: this.model.topic.get("draft_key"),
+            draftSequence: this.model.topic.get("draft_sequence"),
+            post: this.model
+          };
+          api.container.lookup("controller:composer").open(opts);
         }
       });
 
