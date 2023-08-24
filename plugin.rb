@@ -49,34 +49,67 @@ after_initialize do
   Site.preloaded_category_custom_fields << "journal"
   Site.preloaded_category_custom_fields << "journal_author_groups"
   add_to_serializer(:basic_category, :journal) { object.journal? }
-  add_to_serializer(:basic_category, :journal_author_groups, false) { object.journal_author_groups }
-  add_to_serializer(:basic_category, :include_journal_author_groups?) { SiteSetting.journal_enabled && object.journal? }
+  add_to_serializer(
+    :basic_category,
+    :journal_author_groups,
+    include_condition: -> { SiteSetting.journal_enabled && object.journal? }
+  ) { object.journal_author_groups }
 
   add_to_serializer(:post, :journal) { object.journal? }
-  add_to_serializer(:post, :entry, false) { object.entry? }
-  add_to_serializer(:post, :include_entry?) { SiteSetting.journal_enabled && object.journal? }
-  add_to_serializer(:post, :comment, false) { object.comment? }
-  add_to_serializer(:post, :include_comment?) { SiteSetting.journal_enabled && object.journal? }
-  add_to_serializer(:post, :entry_post_id) { object.entry_post_id }
-  add_to_serializer(:post, :include_entry_post_id?) { SiteSetting.journal_enabled && object.journal? }
+  add_to_serializer(
+    :post,
+    :entry,
+    include_condition: -> { SiteSetting.journal_enabled && object.journal? }
+  ) { object.entry? }
+  add_to_serializer(
+    :post,
+    :comment,
+    include_condition: -> { SiteSetting.journal_enabled && object.journal? }
+  ) { object.comment? }
+  add_to_serializer(
+    :post,
+    :entry_post_id,
+    include_condition: -> { SiteSetting.journal_enabled && object.journal? }
+  ) { object.entry_post_id }
 
   add_to_serializer(:topic_view, :journal) { object.topic.journal? }
-  add_to_serializer(:topic_view, :journal_author, false) { BasicUserSerializer.new(object.topic.journal_author, scope: scope, root: false) }
-  add_to_serializer(:topic_view, :include_journal_author?) { SiteSetting.journal_enabled && object.topic.journal? }
-  add_to_serializer(:topic_view, :entry_count) { object.topic.entry_count }
-  add_to_serializer(:topic_view, :include_entry_count?) { SiteSetting.journal_enabled && object.topic.journal? }
-  add_to_serializer(:topic_view, :comment_count) { object.topic.comment_count }
-  add_to_serializer(:topic_view, :include_comment_count?) { SiteSetting.journal_enabled && object.topic.journal? }
-  add_to_serializer(:topic_view, :entry_post_ids) { object.topic.entries.map(&:id) }
-  add_to_serializer(:topic_view, :include_entry_post_ids?) { SiteSetting.journal_enabled && object.topic.journal? }
-  add_to_serializer(:topic_view, :last_entry_post_number) { object.topic.entries.last.post_number }
-  add_to_serializer(:topic_view, :include_last_entry_post_number?) { SiteSetting.journal_enabled && object.topic.journal? }
-  add_to_serializer(:topic_view, :can_create_entry) { scope&.user && scope.can_create_entry_on_topic?(object.topic) }
-  add_to_serializer(:topic_view, :include_can_create_entry?) { SiteSetting.journal_enabled && object.topic.journal? }
+  add_to_serializer(
+    :topic_view,
+    :journal_author,
+    include_condition: -> { SiteSetting.journal_enabled && object.topic.journal? }
+  ) { BasicUserSerializer.new(object.topic.journal_author, scope: scope, root: false) }
+  add_to_serializer(
+    :topic_view,
+    :entry_count,
+    include_condition: -> { SiteSetting.journal_enabled && object.topic.journal? }
+  ) { object.topic.entry_count }
+  add_to_serializer(
+    :topic_view,
+    :comment_count,
+    include_condition: -> { SiteSetting.journal_enabled && object.topic.journal? }
+  ) { object.topic.comment_count }
+  add_to_serializer(
+    :topic_view,
+    :entry_post_ids,
+    include_condition: -> { SiteSetting.journal_enabled && object.topic.journal? }
+  ) { object.topic.entries.map(&:id) }
+  add_to_serializer(
+    :topic_view,
+    :last_entry_post_number,
+    include_condition: -> { SiteSetting.journal_enabled && object.topic.journal? }
+  ) { object.topic.entries.last.post_number }
+  add_to_serializer(
+    :topic_view,
+    :can_create_entry,
+    include_condition: -> { SiteSetting.journal_enabled && object.topic.journal? }
+  ) { scope&.user && scope.can_create_entry_on_topic?(object.topic) }
 
   add_to_serializer(:topic_list_item, :journal) { object.journal? }
-  add_to_serializer(:topic_list_item, :entry_count, false) { object.entry_count }
-  add_to_serializer(:topic_list_item, :include_entry_count?) { SiteSetting.journal_enabled && object.journal? }
+  add_to_serializer(
+    :topic_list_item,
+    :entry_count,
+    include_condition: -> { SiteSetting.journal_enabled && object.journal? }
+  ) { object.entry_count }
 
   on(:post_created) do |post, opts, user|
     post.topic.journal_update_sort_order if post.topic&.journal?
