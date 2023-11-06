@@ -46,8 +46,11 @@ after_initialize do
   add_to_class(:post, :comment?) { journal? && topic.journal_post_map[id]&.second.present? }
   add_to_class(:post, :entry_post_id) { entry? ? id : topic.journal_post_map[id]&.second }
 
-  Site.preloaded_category_custom_fields << "journal"
-  Site.preloaded_category_custom_fields << "journal_author_groups"
+  %w(journal journal_author_groups).each do |field|
+    Site.preloaded_category_custom_fields << field
+    CategoryList.preloaded_category_custom_fields << field
+  end 
+
   add_to_serializer(:basic_category, :journal) { object.journal? }
   add_to_serializer(
     :basic_category,
