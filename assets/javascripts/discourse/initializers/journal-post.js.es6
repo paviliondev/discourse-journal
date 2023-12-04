@@ -154,7 +154,7 @@ export default {
             return this._super(...arguments);
           }
 
-          let showComments = state.showComments;
+          let showComments = (state.showComments || []);
           if (attrs.showComments && attrs.showComments.length) {
             attrs.showComments.forEach(postId => {
               if (!showComments.includes(postId)) {
