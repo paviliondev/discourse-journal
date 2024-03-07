@@ -4,8 +4,9 @@ import { withPluginApi } from "discourse/lib/plugin-api";
 import { h } from "virtual-dom";
 import { next, once } from "@ember/runloop";
 import { alias } from "@ember/object/computed";
-import { getOwner } from "discourse-common/lib/get-owner";
 import Composer from "discourse/models/composer";
+
+const PLUGIN_ID = "discourse-journal";
 
 export default {
   name: "journal-post",
@@ -93,12 +94,14 @@ export default {
       });
 
       api.modifyClass('component:scrolling-post-stream', {
+        pluginId: PLUGIN_ID,
+
         showComments: [],
 
         didInsertElement() {
           this._super(...arguments);
           this.appEvents.on("composer:opened", this, () => {
-            const composer = getOwner(this).lookup("controller:composer");
+            const composer = api.container.lookup("controller:composer");
             const post = composer.get('model.post');
 
             if (post && post.entry) {
@@ -212,6 +215,8 @@ export default {
       });
 
       api.modifyClass("model:post-stream", {
+        pluginId: PLUGIN_ID,
+
         journal: alias('topic.journal'),
 
         getCommentIndex(post) {

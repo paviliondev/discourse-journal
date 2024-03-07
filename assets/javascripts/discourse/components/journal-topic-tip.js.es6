@@ -1,4 +1,4 @@
-import { cookAsync } from "discourse/lib/text";
+import { cook } from "discourse/lib/text";
 import Component from "@ember/component";
 import { bind } from "@ember/runloop";
 
@@ -12,7 +12,7 @@ export default Component.extend({
 
     const rawDetails = I18n.t(this.details);
     if (rawDetails) {
-      cookAsync(rawDetails).then(cooked => {
+      cook(rawDetails).then(cooked => {
         this.set("cookedDetails", cooked);
       });
     }

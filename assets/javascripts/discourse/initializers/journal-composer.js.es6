@@ -4,6 +4,8 @@ import { REPLY, CREATE_TOPIC, EDIT } from "discourse/models/composer";
 import { computed } from "@ember/object";
 import { alias } from "@ember/object/computed";
 
+const PLUGIN_ID = "discourse-journal";
+
 export default {
   name: "journal-composer",
   initialize(container) {
@@ -47,6 +49,8 @@ export default {
 
     withPluginApi("0.8.12", api => {
       api.modifyClass('controller:composer', {
+        pluginId: PLUGIN_ID,
+
         open(opts) {
           if (opts.topic && opts.topic.journal && opts.quote && !opts.post) {
             opts.post = opts.topic.postStream.posts[0];
@@ -85,6 +89,8 @@ export default {
       });
 
       api.modifyClass("component:composer-action-title", {
+        pluginId: PLUGIN_ID,
+
         @discourseComputed("options", "action", "model.category")
         actionTitle(opts, action, category) {
           let key = getJournalComposerKey(action, this.model);
@@ -99,6 +105,8 @@ export default {
       });
 
       api.modifyClass("component:composer-actions", {
+        pluginId: PLUGIN_ID,
+
         didReceiveAttrs() {
           const composer = this.get("composerModel");
           if (composer) {

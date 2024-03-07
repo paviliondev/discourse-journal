@@ -1,9 +1,9 @@
-{{d-button
+<DButton
   class="btn btn-topic-tip"
-  action=(action "toggleDetails")
-  label=label
-  icon="info-circle"
-}}
+  @action={{action "toggleDetails"}}
+  @label=label
+  @icon="info-circle"
+/>
 
 {{#if showDetails}}
   <div class="tip-details">

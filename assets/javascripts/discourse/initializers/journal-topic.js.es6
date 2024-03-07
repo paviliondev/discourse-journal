@@ -7,6 +7,8 @@ import { scheduleOnce } from "@ember/runloop";
 import { h } from "virtual-dom";
 import { deepMerge } from "discourse-common/lib/object";
 
+const PLUGIN_ID = "discourse-journal";
+
 export default {
   name: "journal-topic",
   initialize(container) {
@@ -17,6 +19,8 @@ export default {
 
     withPluginApi("0.8.12", api => {
       api.modifyClass('route:topic', {
+        pluginId: PLUGIN_ID,
+
         isJournal() {
           const controller = this.controllerFor("topic");
           const topic = controller.get("model");
@@ -43,6 +47,8 @@ export default {
       });
 
       api.modifyClass("model:topic", {
+        pluginId: PLUGIN_ID,
+
         @discourseComputed("journal")
         showJournalTip(journalEnabled) {
           return journalEnabled && siteSettings.journal_show_topic_tip;
@@ -57,6 +63,8 @@ export default {
       });
 
       api.modifyClass("component:topic-footer-buttons", {
+        pluginId: PLUGIN_ID,
+
         didInsertElement() {
           this._super(...arguments);
 
@@ -72,35 +80,39 @@ export default {
         }
       });
 
-      api.reopenWidget("timeline-scrollarea", {
-        html(attrs, state) {
-          const result = this._super(attrs, state);
+      //TODO Consider re-implementing in future
+      // api.reopenWidget("timeline-scrollarea", {
+      //   html(attrs, state) {
+      //     const result = this._super(attrs, state);
 
-          if (siteSettings.journal_entries_timeline && attrs.topic.journal) {
-            const position = this.position();
+      //     if (siteSettings.journal_entries_timeline && attrs.topic.journal) {
+      //       const position = this.position();
 
-            result.push(
-              this.attach("timeline-entries",
-                deepMerge(position, attrs)
-              )
-            );
-          }
+      //       result.push(
+      //         this.attach("timeline-entries",
+      //           deepMerge(position, attrs)
+      //         )
+      //       );
+      //     }
 
-          return result;
-        }
-      });
+      //     return result;
+      //   }
+      // });
 
-      api.reopenWidget("timeline-last-read", {
-        html(attrs) {
-          if (attrs.journal) {
-            return '';
-          } else {
-            return this._super(...arguments);
-          }
-        }
-      })
+      //TODO Consider re-implementing in future
+      // api.reopenWidget("timeline-last-read", {
+      //   html(attrs) {
+      //     if (attrs.journal) {
+      //       return '';
+      //     } else {
+      //       return this._super(...arguments);
+      //     }
+      //   }
+      // })
 
       api.modifyClass("component:topic-progress", {
+        pluginId: PLUGIN_ID,
+
         @discourseComputed(
           "progressPosition",
           "topic.last_read_post_id",
@@ -128,124 +140,125 @@ export default {
         });
       }
 
-      api.reopenWidget("topic-map-summary", {
-        html(attrs, state) {
-          if (attrs.journal) {
-            return this.journalMap(attrs, state);
-          } else {
-            return this._super(attrs, state);
-          }
-        },
+      //TODO This breaks in 3.2.x due to missing topic-participant widget.
+      //   api.reopenWidget("topic-map-summary", {
+      //   html(attrs, state) {
+      //     if (attrs.journal) {
+      //       return this.journalMap(attrs, state);
+      //     } else {
+      //       return this._super(attrs, state);
+      //     }
+      //   },
 
-        journalMap(attrs, state) {
-          const contents = [];
-          const post = this.findAncestorModel();
-          const topic = post.topic;
+      //   journalMap(attrs, state) {
+      //     const contents = [];
+      //     const post = this.findAncestorModel();
+      //     const topic = post.topic;
 
-          contents.push(
-            h("li", [
-              h("h4", I18n.t("created_lowercase")),
-              h("div.topic-map-post.created-at", [
-                avatarFor("tiny", {
-                  username: attrs.createdByUsername,
-                  template: attrs.createdByAvatarTemplate,
-                  name: attrs.createdByName
-                }),
-                dateNode(attrs.topicCreatedAt)
-              ])
-            ])
-          );
+      //     contents.push(
+      //       h("li", [
+      //         h("h4", I18n.t("created_lowercase")),
+      //         h("div.topic-map-post.created-at", [
+      //           avatarFor("tiny", {
+      //             username: attrs.createdByUsername,
+      //             template: attrs.createdByAvatarTemplate,
+      //             name: attrs.createdByName
+      //           }),
+      //           dateNode(attrs.topicCreatedAt)
+      //         ])
+      //       ])
+      //     );
 
-          let lastEntryUrl = attrs.topicUrl + "/" + topic.last_entry_post_number;
+      //     let lastEntryUrl = attrs.topicUrl + "/" + topic.last_entry_post_number;
 
-          contents.push(
-            h(
-              "li",
-              h("a", { attributes: { href: lastEntryUrl } }, [
-                h("h4", I18n.t(`last_entry_lowercase`)),
-                h("div.topic-map-post.last-entry", [
-                  avatarFor("tiny", {
-                    username: topic.journal_author.username,
-                    template: topic.journal_author.avatar_template,
-                    name: topic.journal_author.name
-                  }),
-                  dateNode(attrs.lastPostAt)
-                ])
-              ])
-            )
-          );
+      //     contents.push(
+      //       h(
+      //         "li",
+      //         h("a", { attributes: { href: lastEntryUrl } }, [
+      //           h("h4", I18n.t(`last_entry_lowercase`)),
+      //           h("div.topic-map-post.last-entry", [
+      //             avatarFor("tiny", {
+      //               username: topic.journal_author.username,
+      //               template: topic.journal_author.avatar_template,
+      //               name: topic.journal_author.name
+      //             }),
+      //             dateNode(attrs.lastPostAt)
+      //           ])
+      //         ])
+      //       )
+      //     );
 
-          contents.push(
-            h("li", [
-              numberNode(topic.entry_count),
-              h(
-                "h4",
-                I18n.t(`entry_lowercase`, { count: topic.entry_count })
-              )
-            ])
-          );
+      //     contents.push(
+      //       h("li", [
+      //         numberNode(topic.entry_count),
+      //         h(
+      //           "h4",
+      //           I18n.t(`entry_lowercase`, { count: topic.entry_count })
+      //         )
+      //       ])
+      //     );
 
-          contents.push(
-            h("li", [
-              numberNode(topic.comment_count),
-              h(
-                "h4",
-                I18n.t(`comment_lowercase`, { count: topic.comment_count })
-              )
-            ])
-          );
+      //     contents.push(
+      //       h("li", [
+      //         numberNode(topic.comment_count),
+      //         h(
+      //           "h4",
+      //           I18n.t(`comment_lowercase`, { count: topic.comment_count })
+      //         )
+      //       ])
+      //     );
 
-          contents.push(
-            h("li.secondary", [
-              numberNode(attrs.topicViews, { className: attrs.topicViewsHeat }),
-              h("h4", I18n.t("views_lowercase", { count: attrs.topicViews }))
-            ])
-          );
+      //     contents.push(
+      //       h("li.secondary", [
+      //         numberNode(attrs.topicViews, { className: attrs.topicViewsHeat }),
+      //         h("h4", I18n.t("views_lowercase", { count: attrs.topicViews }))
+      //       ])
+      //     );
 
-          if (attrs.topicLikeCount) {
-            contents.push(
-              h("li.secondary", [
-                numberNode(attrs.topicLikeCount),
-                h("h4", I18n.t("likes_lowercase", { count: attrs.topicLikeCount }))
-              ])
-            );
-          }
+      //     if (attrs.topicLikeCount) {
+      //       contents.push(
+      //         h("li.secondary", [
+      //           numberNode(attrs.topicLikeCount),
+      //           h("h4", I18n.t("likes_lowercase", { count: attrs.topicLikeCount }))
+      //         ])
+      //       );
+      //     }
 
-          if (attrs.topicLinkLength > 0) {
-            contents.push(
-              h("li.secondary", [
-                numberNode(attrs.topicLinkLength),
-                h("h4", I18n.t("links_lowercase", { count: attrs.topicLinkLength }))
-              ])
-            );
-          }
+      //     if (attrs.topicLinkLength > 0) {
+      //       contents.push(
+      //         h("li.secondary", [
+      //           numberNode(attrs.topicLinkLength),
+      //           h("h4", I18n.t("links_lowercase", { count: attrs.topicLinkLength }))
+      //         ])
+      //       );
+      //     }
 
-          if (
-            state.collapsed &&
-            attrs.topicPostsCount > 2 &&
-            attrs.participants.length > 0
-          ) {
-            const participants = renderParticipants.call(
-              this,
-              attrs.userFilters,
-              attrs.participants.slice(0, 3)
-            );
-            contents.push(h("li.avatars", participants));
-          }
+      //     if (
+      //       state.collapsed &&
+      //       attrs.topicPostsCount > 2 &&
+      //       attrs.participants.length > 0
+      //     ) {
+      //       const participants = renderParticipants.call(
+      //         this,
+      //         attrs.userFilters,
+      //         attrs.participants.slice(0, 3)
+      //       );
+      //       contents.push(h("li.avatars", participants));
+      //     }
 
-          const nav = h(
-            "nav.buttons",
-            this.attach("button", {
-              title: "topic.toggle_information",
-              icon: state.collapsed ? "chevron-down" : "chevron-up",
-              action: "toggleMap",
-              className: "btn"
-            })
-          );
+      //     const nav = h(
+      //       "nav.buttons",
+      //       this.attach("button", {
+      //         title: "topic.toggle_information",
+      //         icon: state.collapsed ? "chevron-down" : "chevron-up",
+      //         action: "toggleMap",
+      //         className: "btn"
+      //       })
+      //     );
 
-          return [nav, h("ul.clearfix", contents)];
-        }
-      });
+      //     return [nav, h("ul.clearfix", contents)];
+      //   }
+      // });
     });
   }
 }
