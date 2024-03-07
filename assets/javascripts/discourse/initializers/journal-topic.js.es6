@@ -140,125 +140,125 @@ export default {
         });
       }
 
-      //TODO This breaks in 3.3.x
-        api.reopenWidget("topic-map-summary", {
-        html(attrs, state) {
-          if (attrs.journal) {
-            return this.journalMap(attrs, state);
-          } else {
-            return this._super(attrs, state);
-          }
-        },
+      //TODO This breaks in 3.2.x due to missing topic-participant widget.
+      //   api.reopenWidget("topic-map-summary", {
+      //   html(attrs, state) {
+      //     if (attrs.journal) {
+      //       return this.journalMap(attrs, state);
+      //     } else {
+      //       return this._super(attrs, state);
+      //     }
+      //   },
 
-        journalMap(attrs, state) {
-          const contents = [];
-          const post = this.findAncestorModel();
-          const topic = post.topic;
+      //   journalMap(attrs, state) {
+      //     const contents = [];
+      //     const post = this.findAncestorModel();
+      //     const topic = post.topic;
 
-          contents.push(
-            h("li", [
-              h("h4", I18n.t("created_lowercase")),
-              h("div.topic-map-post.created-at", [
-                avatarFor("tiny", {
-                  username: attrs.createdByUsername,
-                  template: attrs.createdByAvatarTemplate,
-                  name: attrs.createdByName
-                }),
-                dateNode(attrs.topicCreatedAt)
-              ])
-            ])
-          );
+      //     contents.push(
+      //       h("li", [
+      //         h("h4", I18n.t("created_lowercase")),
+      //         h("div.topic-map-post.created-at", [
+      //           avatarFor("tiny", {
+      //             username: attrs.createdByUsername,
+      //             template: attrs.createdByAvatarTemplate,
+      //             name: attrs.createdByName
+      //           }),
+      //           dateNode(attrs.topicCreatedAt)
+      //         ])
+      //       ])
+      //     );
 
-          let lastEntryUrl = attrs.topicUrl + "/" + topic.last_entry_post_number;
+      //     let lastEntryUrl = attrs.topicUrl + "/" + topic.last_entry_post_number;
 
-          contents.push(
-            h(
-              "li",
-              h("a", { attributes: { href: lastEntryUrl } }, [
-                h("h4", I18n.t(`last_entry_lowercase`)),
-                h("div.topic-map-post.last-entry", [
-                  avatarFor("tiny", {
-                    username: topic.journal_author.username,
-                    template: topic.journal_author.avatar_template,
-                    name: topic.journal_author.name
-                  }),
-                  dateNode(attrs.lastPostAt)
-                ])
-              ])
-            )
-          );
+      //     contents.push(
+      //       h(
+      //         "li",
+      //         h("a", { attributes: { href: lastEntryUrl } }, [
+      //           h("h4", I18n.t(`last_entry_lowercase`)),
+      //           h("div.topic-map-post.last-entry", [
+      //             avatarFor("tiny", {
+      //               username: topic.journal_author.username,
+      //               template: topic.journal_author.avatar_template,
+      //               name: topic.journal_author.name
+      //             }),
+      //             dateNode(attrs.lastPostAt)
+      //           ])
+      //         ])
+      //       )
+      //     );
 
-          contents.push(
-            h("li", [
-              numberNode(topic.entry_count),
-              h(
-                "h4",
-                I18n.t(`entry_lowercase`, { count: topic.entry_count })
-              )
-            ])
-          );
+      //     contents.push(
+      //       h("li", [
+      //         numberNode(topic.entry_count),
+      //         h(
+      //           "h4",
+      //           I18n.t(`entry_lowercase`, { count: topic.entry_count })
+      //         )
+      //       ])
+      //     );
 
-          contents.push(
-            h("li", [
-              numberNode(topic.comment_count),
-              h(
-                "h4",
-                I18n.t(`comment_lowercase`, { count: topic.comment_count })
-              )
-            ])
-          );
+      //     contents.push(
+      //       h("li", [
+      //         numberNode(topic.comment_count),
+      //         h(
+      //           "h4",
+      //           I18n.t(`comment_lowercase`, { count: topic.comment_count })
+      //         )
+      //       ])
+      //     );
 
-          contents.push(
-            h("li.secondary", [
-              numberNode(attrs.topicViews, { className: attrs.topicViewsHeat }),
-              h("h4", I18n.t("views_lowercase", { count: attrs.topicViews }))
-            ])
-          );
+      //     contents.push(
+      //       h("li.secondary", [
+      //         numberNode(attrs.topicViews, { className: attrs.topicViewsHeat }),
+      //         h("h4", I18n.t("views_lowercase", { count: attrs.topicViews }))
+      //       ])
+      //     );
 
-          if (attrs.topicLikeCount) {
-            contents.push(
-              h("li.secondary", [
-                numberNode(attrs.topicLikeCount),
-                h("h4", I18n.t("likes_lowercase", { count: attrs.topicLikeCount }))
-              ])
-            );
-          }
+      //     if (attrs.topicLikeCount) {
+      //       contents.push(
+      //         h("li.secondary", [
+      //           numberNode(attrs.topicLikeCount),
+      //           h("h4", I18n.t("likes_lowercase", { count: attrs.topicLikeCount }))
+      //         ])
+      //       );
+      //     }
 
-          if (attrs.topicLinkLength > 0) {
-            contents.push(
-              h("li.secondary", [
-                numberNode(attrs.topicLinkLength),
-                h("h4", I18n.t("links_lowercase", { count: attrs.topicLinkLength }))
-              ])
-            );
-          }
+      //     if (attrs.topicLinkLength > 0) {
+      //       contents.push(
+      //         h("li.secondary", [
+      //           numberNode(attrs.topicLinkLength),
+      //           h("h4", I18n.t("links_lowercase", { count: attrs.topicLinkLength }))
+      //         ])
+      //       );
+      //     }
 
-          if (
-            state.collapsed &&
-            attrs.topicPostsCount > 2 &&
-            attrs.participants.length > 0
-          ) {
-            const participants = renderParticipants.call(
-              this,
-              attrs.userFilters,
-              attrs.participants.slice(0, 3)
-            );
-            contents.push(h("li.avatars", participants));
-          }
+      //     if (
+      //       state.collapsed &&
+      //       attrs.topicPostsCount > 2 &&
+      //       attrs.participants.length > 0
+      //     ) {
+      //       const participants = renderParticipants.call(
+      //         this,
+      //         attrs.userFilters,
+      //         attrs.participants.slice(0, 3)
+      //       );
+      //       contents.push(h("li.avatars", participants));
+      //     }
 
-          const nav = h(
-            "nav.buttons",
-            this.attach("button", {
-              title: "topic.toggle_information",
-              icon: state.collapsed ? "chevron-down" : "chevron-up",
-              action: "toggleMap",
-              className: "btn"
-            })
-          );
+      //     const nav = h(
+      //       "nav.buttons",
+      //       this.attach("button", {
+      //         title: "topic.toggle_information",
+      //         icon: state.collapsed ? "chevron-down" : "chevron-up",
+      //         action: "toggleMap",
+      //         className: "btn"
+      //       })
+      //     );
 
-          return [nav, h("ul.clearfix", contents)];
-        }
-      });
+      //     return [nav, h("ul.clearfix", contents)];
+      //   }
+      // });
     });
   }
 }
