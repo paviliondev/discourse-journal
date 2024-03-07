@@ -7,6 +7,8 @@ import { scheduleOnce } from "@ember/runloop";
 import { h } from "virtual-dom";
 import { deepMerge } from "discourse-common/lib/object";
 
+const PLUGIN_ID = "discourse-journal";
+
 export default {
   name: "journal-topic",
   initialize(container) {
@@ -17,6 +19,8 @@ export default {
 
     withPluginApi("0.8.12", api => {
       api.modifyClass('route:topic', {
+        pluginId: PLUGIN_ID,
+
         isJournal() {
           const controller = this.controllerFor("topic");
           const topic = controller.get("model");
@@ -43,6 +47,8 @@ export default {
       });
 
       api.modifyClass("model:topic", {
+        pluginId: PLUGIN_ID,
+
         @discourseComputed("journal")
         showJournalTip(journalEnabled) {
           return journalEnabled && siteSettings.journal_show_topic_tip;
@@ -57,6 +63,8 @@ export default {
       });
 
       api.modifyClass("component:topic-footer-buttons", {
+        pluginId: PLUGIN_ID,
+
         didInsertElement() {
           this._super(...arguments);
 
@@ -72,35 +80,39 @@ export default {
         }
       });
 
-      api.reopenWidget("timeline-scrollarea", {
-        html(attrs, state) {
-          const result = this._super(attrs, state);
+      //TODO Consider re-implementing in future
+      // api.reopenWidget("timeline-scrollarea", {
+      //   html(attrs, state) {
+      //     const result = this._super(attrs, state);
 
-          if (siteSettings.journal_entries_timeline && attrs.topic.journal) {
-            const position = this.position();
+      //     if (siteSettings.journal_entries_timeline && attrs.topic.journal) {
+      //       const position = this.position();
 
-            result.push(
-              this.attach("timeline-entries",
-                deepMerge(position, attrs)
-              )
-            );
-          }
+      //       result.push(
+      //         this.attach("timeline-entries",
+      //           deepMerge(position, attrs)
+      //         )
+      //       );
+      //     }
 
-          return result;
-        }
-      });
+      //     return result;
+      //   }
+      // });
 
-      api.reopenWidget("timeline-last-read", {
-        html(attrs) {
-          if (attrs.journal) {
-            return '';
-          } else {
-            return this._super(...arguments);
-          }
-        }
-      })
+      //TODO Consider re-implementing in future
+      // api.reopenWidget("timeline-last-read", {
+      //   html(attrs) {
+      //     if (attrs.journal) {
+      //       return '';
+      //     } else {
+      //       return this._super(...arguments);
+      //     }
+      //   }
+      // })
 
       api.modifyClass("component:topic-progress", {
+        pluginId: PLUGIN_ID,
+
         @discourseComputed(
           "progressPosition",
           "topic.last_read_post_id",
@@ -128,7 +140,8 @@ export default {
         });
       }
 
-      api.reopenWidget("topic-map-summary", {
+      //TODO This breaks in 3.3.x
+        api.reopenWidget("topic-map-summary", {
         html(attrs, state) {
           if (attrs.journal) {
             return this.journalMap(attrs, state);

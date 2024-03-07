@@ -1,6 +1,8 @@
 import { withPluginApi } from "discourse/lib/plugin-api";
 import discourseComputed from "discourse-common/utils/decorators";
 
+const PLUGIN_ID = "discourse-journal";
+
 export default {
   name: "journal-discovery",
   initialize(container) {
@@ -9,6 +11,8 @@ export default {
 
     withPluginApi('0.8.12', api => {
       api.modifyClass('component:d-navigation', {
+        pluginId: PLUGIN_ID,
+
         @discourseComputed("hasDraft", "category.journal")
         createTopicLabel(hasDraft, journalCategory) {
           if (journalCategory) {
@@ -20,8 +24,14 @@ export default {
       });
 
       api.modifyClass('route:discovery', {
+        pluginId: PLUGIN_ID,
+
         discoveryCategory() {
-          return this.controllerFor("navigation/category").get("category");
+          if (this.router.currentRouteName == "discovery.category") {
+            return this.router.currentRoute.attributes.category
+          } else {
+            return null;
+          }
         },
 
         actions: {
