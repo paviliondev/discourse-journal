@@ -7,10 +7,12 @@ export default {
   name: "journal-discovery",
   initialize(container) {
     const siteSettings = container.lookup("site-settings:main");
-    if (!siteSettings.journal_enabled) return;
+    if (!siteSettings.journal_enabled) {
+      return;
+    }
 
-    withPluginApi('0.8.12', api => {
-      api.modifyClass('component:d-navigation', {
+    withPluginApi("0.8.12", (api) => {
+      api.modifyClass("component:d-navigation", {
         pluginId: PLUGIN_ID,
 
         @discourseComputed("hasDraft", "category.journal")
@@ -23,12 +25,12 @@ export default {
         },
       });
 
-      api.modifyClass('route:discovery', {
+      api.modifyClass("route:discovery", {
         pluginId: PLUGIN_ID,
 
         discoveryCategory() {
-          if (this.router.currentRouteName == "discovery.category") {
-            return this.router.currentRoute.attributes.category
+          if (this.router.currentRouteName === "discovery.category") {
+            return this.router.currentRoute.attributes.category;
           } else {
             return null;
           }
@@ -50,8 +52,8 @@ export default {
             }
             return this._super();
           },
-        }
-      })
+        },
+      });
     });
-  }
-}
+  },
+};

@@ -102,7 +102,7 @@ div.topic-post {
       }
 
       .cooked {
-        padding-top: .25em;
+        padding-top: 0.25em;
       }
 
       .post-controls .actions {
@@ -130,11 +130,11 @@ div.topic-post {
       .who-read {
         position: absolute;
         background-color: $secondary;
-        box-shadow: shadow('dropdown');
+        box-shadow: shadow("dropdown");
         right: 0;
         margin: 0;
         z-index: 1;
-        padding: .5em 1em;
+        padding: 0.5em 1em;
         border-top: 1px solid $primary-low;
       }
     }
@@ -144,7 +144,8 @@ div.topic-post {
     }
   }
 
-  &.comment, &.entry {
+  &.comment,
+  &.entry {
     .post-notice.new-user {
       display: none;
     }
@@ -163,15 +164,15 @@ div.topic-post {
 .journal-topic-tip {
   position: relative;
   margin-top: 5px;
-  
+
   .btn-topic-tip {
     padding: 3px 6px;
-    font-size: .8706em;
+    font-size: 0.8706em;
   }
 
   .tip-details {
     background-color: dark-light-diff($primary, $secondary, 95%, -85%);
-    box-shadow: shadow('dropdown');
+    box-shadow: shadow("dropdown");
     padding: 10px 15px;
     position: absolute;
     top: 25px;

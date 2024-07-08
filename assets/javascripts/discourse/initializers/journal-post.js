@@ -1,10 +1,8 @@
-import discourseComputed, { observes } from "discourse-common/utils/decorators";
 import PostsWithPlaceholders from "discourse/lib/posts-with-placeholders";
 import { withPluginApi } from "discourse/lib/plugin-api";
-import { h } from "virtual-dom";
-import { next, once } from "@ember/runloop";
 import { alias } from "@ember/object/computed";
 import Composer from "discourse/models/composer";
+import I18n from "I18n";
 
 const PLUGIN_ID = "discourse-journal";
 
@@ -12,12 +10,12 @@ export default {
   name: "journal-post",
   initialize(container) {
     const siteSettings = container.lookup("site-settings:main");
-    if (!siteSettings.journal_enabled) return;
+    if (!siteSettings.journal_enabled) {
+      return;
+    }
 
-    withPluginApi("0.8.12", api => {
+    withPluginApi("0.8.12", (api) => {
       const store = api.container.lookup("store:main");
-      const appEvents = api.container.lookup("service:app-events");
-      const currentUser = api.getCurrentUser();
 
       api.includePostAttributes(
         "journal",
@@ -33,33 +31,31 @@ export default {
         menuItems() {
           let result = siteSettings.post_menu.split("|").filter(Boolean);
           if (this.attrs.journal) {
-            result = result.filter(b => b !== "reply");
+            result = result.filter((b) => b !== "reply");
           }
           return result;
-        }
+        },
       });
 
-      api.decorateWidget("post:after", function(helper) {
+      api.decorateWidget("post:after", function (helper) {
         const model = helper.getModel();
 
         if (model.attachCommentToggle && model.hiddenComments > 0) {
           let type =
-            Number(siteSettings.journal_comments_default) > 0
-              ? "more"
-              : "all";
+            Number(siteSettings.journal_comments_default) > 0 ? "more" : "all";
 
           return helper.attach("link", {
             action: "showComments",
             actionParam: model.entry_post_id,
             rawLabel: I18n.t(`topic.comment.show_comments.${type}`, {
-              count: model.hiddenComments
+              count: model.hiddenComments,
             }),
-            className: "show-comments"
+            className: "show-comments",
           });
         }
       });
 
-      api.addPostClassesCallback(attrs => {
+      api.addPostClassesCallback((attrs) => {
         if (attrs.journal && !attrs.firstPost) {
           if (attrs.comment) {
             let classes = ["comment"];
@@ -73,16 +69,16 @@ export default {
         }
       });
 
-      api.addPostMenuButton("comment", attrs => {
+      api.addPostMenuButton("comment", (attrs) => {
         if (attrs.canCreatePost && attrs.journal) {
           let replyComment = attrs.reply_to_post_number;
-          let i18nKey = replyComment ? 'comment_reply' : 'comment';
+          let i18nKey = replyComment ? "comment_reply" : "comment";
 
           let args = {
             action: "openCommentCompose",
             title: `topic.${i18nKey}.help`,
             icon: replyComment ? "reply" : "comment",
-            className: "comment create fade-out"
+            className: "comment create fade-out",
           };
 
           if (!attrs.mobileView && !replyComment) {
@@ -93,7 +89,7 @@ export default {
         }
       });
 
-      api.modifyClass('component:scrolling-post-stream', {
+      api.modifyClass("component:scrolling-post-stream", {
         pluginId: PLUGIN_ID,
 
         showComments: [],
@@ -102,10 +98,10 @@ export default {
           this._super(...arguments);
           this.appEvents.on("composer:opened", this, () => {
             const composer = api.container.lookup("controller:composer");
-            const post = composer.get('model.post');
+            const post = composer.get("model.post");
 
             if (post && post.entry) {
-              this.set('showComments', [post.id]);
+              this.set("showComments", [post.id]);
             }
 
             this._refresh({ force: true });
@@ -115,11 +111,9 @@ export default {
         buildArgs() {
           return Object.assign(
             this._super(...arguments),
-            this.getProperties(
-              'showComments'
-            )
-          )
-        }
+            this.getProperties("showComments")
+          );
+        },
       });
 
       api.reopenWidget("post-stream", {
@@ -157,9 +151,9 @@ export default {
             return this._super(...arguments);
           }
 
-          let showComments = (state.showComments || []);
+          let showComments = state.showComments || [];
           if (attrs.showComments && attrs.showComments.length) {
-            attrs.showComments.forEach(postId => {
+            attrs.showComments.forEach((postId) => {
               if (!showComments.includes(postId)) {
                 showComments.push(postId);
               }
@@ -189,9 +183,13 @@ export default {
                 lastVisible = i;
               }
 
-              if ((!postArray[i + 1] || postArray[i + 1].entry) && !p["showComment"]) {
+              if (
+                (!postArray[i + 1] || postArray[i + 1].entry) &&
+                !p["showComment"]
+              ) {
                 postArray[lastVisible]["attachCommentToggle"] = true;
-                postArray[lastVisible]["hiddenComments"] = commentCount - defaultComments;
+                postArray[lastVisible]["hiddenComments"] =
+                  commentCount - defaultComments;
               }
             } else {
               p["attachCommentToggle"] = false;
@@ -206,18 +204,18 @@ export default {
           } else {
             attrs.posts = PostsWithPlaceholders.create({
               posts: postArray,
-              store
+              store,
             });
           }
 
           return this._super(attrs, state);
-        }
+        },
       });
 
       api.modifyClass("model:post-stream", {
         pluginId: PLUGIN_ID,
 
-        journal: alias('topic.journal'),
+        journal: alias("topic.journal"),
 
         getCommentIndex(post) {
           const posts = this.get("posts");
@@ -229,7 +227,10 @@ export default {
               commentIndex = i;
               return true;
             }
-            if (p.post_number == post.reply_to_post_number && (i < posts.length - 1)) {
+            if (
+              p.post_number === post.reply_to_post_number &&
+              i < posts.length - 1
+            ) {
               passed = true;
             }
           });
@@ -248,9 +249,11 @@ export default {
           }
         },
 
-        stagePost(post, user) {
+        stagePost(post) {
           let result = this._super(...arguments);
-          if (!this.journal) return result;
+          if (!this.journal) {
+            return result;
+          }
 
           if (post.get("reply_to_post_number")) {
             this.insertCommentInStream(post);
@@ -261,7 +264,9 @@ export default {
 
         commitPost(post) {
           let result = this._super(...arguments);
-          if (!this.journal) return result;
+          if (!this.journal) {
+            return result;
+          }
 
           if (post.get("reply_to_post_number")) {
             this.insertCommentInStream(post);
@@ -271,7 +276,9 @@ export default {
         },
 
         prependPost(post) {
-          if (!this.journal) return this._super(...arguments);
+          if (!this.journal) {
+            return this._super(...arguments);
+          }
 
           const stored = this.storePost(post);
           if (stored) {
@@ -280,7 +287,7 @@ export default {
             if (post.post_number === 2 && posts[0].post_number === 1) {
               posts.insertAt(1, stored);
             } else {
-              posts.unshiftObject(stored)
+              posts.unshiftObject(stored);
             }
           }
 
@@ -288,7 +295,9 @@ export default {
         },
 
         appendPost(post) {
-          if (!this.journal) return this._super(...arguments);
+          if (!this.journal) {
+            return this._super(...arguments);
+          }
 
           const stored = this.storePost(post);
           if (stored) {
@@ -318,7 +327,7 @@ export default {
           }
 
           return post;
-        }
+        },
       });
 
       api.reopenWidget("post-avatar", {
@@ -334,7 +343,7 @@ export default {
           }
 
           return this._super(...arguments);
-        }
+        },
       });
 
       api.reopenWidget("post", {
@@ -363,10 +372,10 @@ export default {
             action: Composer.REPLY,
             draftKey: this.model.topic.get("draft_key"),
             draftSequence: this.model.topic.get("draft_sequence"),
-            post: this.model
+            post: this.model,
           };
           api.container.lookup("controller:composer").open(opts);
-        }
+        },
       });
 
       api.reopenWidget("reply-to-tab", {
@@ -379,7 +388,7 @@ export default {
             return this._super(...arguments);
           }
         },
-      })
+      });
     });
-  }
+  },
 };

@@ -1,10 +1,11 @@
 import { createWidget } from "discourse/widgets/widget";
 import { h } from "virtual-dom";
+import I18n from "I18n";
 
 createWidget("timeline-entries", {
   tagName: "div.timeline-entries",
 
-  html(attrs, state) {
+  html(attrs) {
     const { topic, current } = attrs;
 
     const $scrollArea = $(".timeline-scrollarea");
@@ -18,15 +19,15 @@ createWidget("timeline-entries", {
     let contents = [
       this.attach("link", {
         className: "entries-title",
-        rawLabel: `${count} ${I18n.t('entry_lowercase', { count })}`,
+        rawLabel: `${count} ${I18n.t("entry_lowercase", { count })}`,
         action: "jumpTop",
-      })
+      }),
     ];
     let entryList = [];
 
     entryPostIds.forEach((postId, index) => {
       let entryNumber = index + 1;
-      let currentEntry = (stream.indexOf(postId) + 1);
+      let currentEntry = stream.indexOf(postId) + 1;
       let entryPercent = currentEntry / totalPosts;
       let position = Math.floor(entryPercent * scrollAreaHeight);
 
@@ -35,16 +36,18 @@ createWidget("timeline-entries", {
         current,
         currentEntry,
         position,
-        scrollAreaHeight
+        scrollAreaHeight,
       });
     });
 
     contents.push(
-      h('.entry-list', 
+      h(
+        ".entry-list",
         entryList.map((marker, index) => {
-          return this.attach('entry-marker',
+          return this.attach(
+            "entry-marker",
             Object.assign(marker, {
-              even: (index % 2 == 0)
+              even: index % 2 === 0,
             })
           );
         })
@@ -52,7 +55,7 @@ createWidget("timeline-entries", {
     );
 
     return contents;
-  }
+  },
 });
 
 const buffer = 4;
@@ -67,32 +70,32 @@ createWidget("entry-marker", {
 
     return {
       style: `top: ${position - buffer}px; height: ${markerHeight}px`,
-      title: I18n.t("topic.entry.jump_to", { entryNumber })
+      title: I18n.t("topic.entry.jump_to", { entryNumber }),
     };
   },
 
   buildClasses(attrs) {
-    let classes = 'entry-marker';
+    let classes = "entry-marker";
 
     if (attrs.current === attrs.currentEntry) {
-      classes += ' active';
+      classes += " active";
     }
 
-    classes += attrs.even ? ' even' : ' odd';
+    classes += attrs.even ? " even" : " odd";
 
     return classes;
   },
 
   html(attrs, state) {
     if (state.showNumber || attrs.current === attrs.currentEntry) {
-      return h('span', `${attrs.entryNumber}`);
+      return h("span", `${attrs.entryNumber}`);
     } else {
-      return '';
+      return "";
     }
   },
 
   click(e) {
-    const percent =  ($(e.target).offset().top - (markerHeight/2) + buffer);
+    const percent = $(e.target).offset().top - markerHeight / 2 + buffer;
     this.sendWidgetAction("updatePercentage", percent);
     this.sendWidgetAction("commit");
   },
@@ -105,5 +108,5 @@ createWidget("entry-marker", {
   mouseOut() {
     this.state.showNumber = false;
     this.scheduleRerender();
-  }
-})
+  },
+});
