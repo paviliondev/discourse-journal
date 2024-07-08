@@ -1,8 +1,9 @@
 import { withPluginApi } from "discourse/lib/plugin-api";
-import discourseComputed, { on, observes } from "discourse-common/utils/decorators";
-import { REPLY, CREATE_TOPIC, EDIT } from "discourse/models/composer";
+import discourseComputed from "discourse-common/utils/decorators";
+import { CREATE_TOPIC, EDIT, REPLY } from "discourse/models/composer";
 import { computed } from "@ember/object";
 import { alias } from "@ember/object/computed";
+import I18n from "I18n";
 
 const PLUGIN_ID = "discourse-journal";
 
@@ -10,8 +11,10 @@ export default {
   name: "journal-composer",
   initialize(container) {
     const siteSettings = container.lookup("site-settings:main");
-    if (!siteSettings.journal_enabled) return;
-    
+    if (!siteSettings.journal_enabled) {
+      return;
+    }
+
     function getJournalComposerKey(action, composerModel) {
       let key;
       let post = composerModel.post;
@@ -21,7 +24,7 @@ export default {
       } else if (action === REPLY && post) {
         key = post.comment ? "reply_to_comment" : "create_comment";
       } else if (action === EDIT && post) {
-        key = post.comment ? "edit_comment" : "edit_entry"
+        key = post.comment ? "edit_comment" : "edit_entry";
       } else {
         key = "create_entry";
       }
@@ -43,12 +46,12 @@ export default {
       return {
         icon,
         name: `composer.composer_actions.${type}.name`,
-        description: `composer.composer_actions.${type}.description`
-      }
+        description: `composer.composer_actions.${type}.description`,
+      };
     }
 
-    withPluginApi("0.8.12", api => {
-      api.modifyClass('controller:composer', {
+    withPluginApi("0.8.12", (api) => {
+      api.modifyClass("controller:composer", {
         pluginId: PLUGIN_ID,
 
         open(opts) {
@@ -58,19 +61,31 @@ export default {
           return this._super(opts);
         },
 
-        @discourseComputed('model.category')
+        @discourseComputed("model.category")
         isJournal(category) {
           return category && category.journal;
         },
 
-        @discourseComputed('model.action', "model.post")
-        journalComposerText(action, post) {
+        @discourseComputed("model.action", "model.post")
+        journalComposerText(action) {
           let key = getJournalComposerKey(action, this.model);
           return getJournalComposerText(key);
         },
 
-        @discourseComputed("model.action", "isWhispering", "model.editConflict", "isJournal", "journalComposerText.name")
-        saveLabel(modelAction, isWhispering, editConflict, isJournal, journalLabel) {
+        @discourseComputed(
+          "model.action",
+          "isWhispering",
+          "model.editConflict",
+          "isJournal",
+          "journalComposerText.name"
+        )
+        saveLabel(
+          modelAction,
+          isWhispering,
+          editConflict,
+          isJournal,
+          journalLabel
+        ) {
           if (isJournal) {
             return journalLabel;
           } else {
@@ -78,7 +93,12 @@ export default {
           }
         },
 
-        @discourseComputed("model.action", "isWhispering", "isJournal", "journalComposerText.icon")
+        @discourseComputed(
+          "model.action",
+          "isWhispering",
+          "isJournal",
+          "journalComposerText.icon"
+        )
         saveIcon(modelAction, isWhispering, isJournal, journalIcon) {
           if (isJournal) {
             return journalIcon;
@@ -96,12 +116,12 @@ export default {
           let key = getJournalComposerKey(action, this.model);
           let text = getJournalComposerText(key);
 
-          if (category && category.journal && text) {            
+          if (category && category.journal && text) {
             return I18n.t(text.name);
           } else {
             return this._super(...arguments);
           }
-        }
+        },
       });
 
       api.modifyClass("component:composer-actions", {
@@ -116,7 +136,7 @@ export default {
         },
 
         commenting: alias("postSnapshot.journal"),
-        commentKey: computed("commenting", function() {
+        commentKey: computed("commenting", function () {
           return getJournalComposerKey(this.action, this.composerModel);
         }),
 
@@ -136,14 +156,14 @@ export default {
                 id: "reply_to_post",
                 icon: text.icon,
                 name: I18n.t(text.name),
-                description: I18n.t(text.description)
-              }
+                description: I18n.t(text.description),
+              },
             ];
           } else {
             return this._super(...arguments);
           }
-        })
+        }),
       });
     });
-  }
+  },
 };

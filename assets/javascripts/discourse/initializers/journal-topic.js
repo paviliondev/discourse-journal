@@ -1,11 +1,7 @@
-import discourseComputed, { on, observes } from "discourse-common/utils/decorators";
+import discourseComputed from "discourse-common/utils/decorators";
 import KeyboardShortcuts from "discourse/lib/keyboard-shortcuts";
-import { avatarFor } from "discourse/widgets/post";
-import { dateNode, numberNode } from "discourse/helpers/node";
 import { withPluginApi } from "discourse/lib/plugin-api";
 import { scheduleOnce } from "@ember/runloop";
-import { h } from "virtual-dom";
-import { deepMerge } from "discourse-common/lib/object";
 
 const PLUGIN_ID = "discourse-journal";
 
@@ -17,8 +13,8 @@ export default {
       return;
     }
 
-    withPluginApi("0.8.12", api => {
-      api.modifyClass('route:topic', {
+    withPluginApi("0.8.12", (api) => {
+      api.modifyClass("route:topic", {
         pluginId: PLUGIN_ID,
 
         isJournal() {
@@ -43,7 +39,7 @@ export default {
             }
             return this._super(...arguments);
           },
-        }
+        },
       });
 
       api.modifyClass("model:topic", {
@@ -54,12 +50,16 @@ export default {
           return journalEnabled && siteSettings.journal_show_topic_tip;
         },
 
-        @discourseComputed("highest_post_number", "url", "last_entry_post_number")
+        @discourseComputed(
+          "highest_post_number",
+          "url",
+          "last_entry_post_number"
+        )
         lastPostUrl(highestPostNumber, url, lastEntryPostNumber) {
-          return lastEntryPostNumber ?
-            this.urlForPostNumber(lastEntryPostNumber) :
-            this.urlForPostNumber(highestPostNumber);
-        }
+          return lastEntryPostNumber
+            ? this.urlForPostNumber(lastEntryPostNumber)
+            : this.urlForPostNumber(highestPostNumber);
+        },
       });
 
       api.modifyClass("component:topic-footer-buttons", {
@@ -77,7 +77,7 @@ export default {
               ).hide();
             });
           }
-        }
+        },
       });
 
       //TODO Consider re-implementing in future
@@ -124,10 +124,10 @@ export default {
           } else {
             return this._super(...arguments);
           }
-        }
+        },
       });
 
-      function renderParticipants(userFilters, participants) {
+      /*function renderParticipants(userFilters, participants) {
         if (!participants) {
           return;
         }
@@ -138,7 +138,7 @@ export default {
             state: { toggled: userFilters.includes(p.username) }
           });
         });
-      }
+      }*/
 
       //TODO This breaks in 3.2.x due to missing topic-participant widget.
       //   api.reopenWidget("topic-map-summary", {
@@ -260,5 +260,5 @@ export default {
       //   }
       // });
     });
-  }
-}
+  },
+};

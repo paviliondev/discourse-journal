@@ -1,7 +1,7 @@
 import { ajax } from "discourse/lib/ajax";
 
 export default {
-  setupComponent(attrs, component) {
+  setupComponent(attrs) {
     const category = attrs.category;
 
     if (!category.custom_fields) {
@@ -12,16 +12,15 @@ export default {
       category.custom_fields.journal_author_groups = "";
     }
 
-    const site = component.get("site");
     const siteGroups = this.site.groups;
     const authorGroups = category.custom_fields.journal_author_groups
       .split("|")
-      .filter(a => a.length != "");
+      .filter((a) => a.length !== "");
 
     this.setProperties({
       authorGroups,
       siteGroups,
-      categoryId: category.id
+      categoryId: category.id,
     });
   },
 
@@ -29,35 +28,38 @@ export default {
     onSelectAuthorGroup(authorGroups) {
       this.setProperties({
         authorGroups,
-        "category.custom_fields.journal_author_groups": authorGroups.join('|')
+        "category.custom_fields.journal_author_groups": authorGroups.join("|"),
       });
     },
 
     updateSortOrder() {
-      this.set('updatingSortOrder', true);
+      this.set("updatingSortOrder", true);
 
-      ajax('/journal//update-sort-order', {
+      ajax("/journal//update-sort-order", {
         type: "POST",
         data: {
-          category_id: this.categoryId
-        }
-      }).then(result => {
-        let syncResultIcon = result.success ? "check" : "times";
-
-        this.setProperties({
-          updatingSortOrder: false,
-          syncResultIcon
-        });
-      }).catch(() => {
-        this.setProperties({
-          syncResultIcon: 'times',
-          updatingSortOrder: false
-        });
-      }).finally(() => {
-        setTimeout(() => {
-          this.set('syncResultIcon', null);
-        }, 6000);
+          category_id: this.categoryId,
+        },
       })
-    }
-  }
+        .then((result) => {
+          let syncResultIcon = result.success ? "check" : "times";
+
+          this.setProperties({
+            updatingSortOrder: false,
+            syncResultIcon,
+          });
+        })
+        .catch(() => {
+          this.setProperties({
+            syncResultIcon: "times",
+            updatingSortOrder: false,
+          });
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.set("syncResultIcon", null);
+          }, 6000);
+        });
+    },
+  },
 };

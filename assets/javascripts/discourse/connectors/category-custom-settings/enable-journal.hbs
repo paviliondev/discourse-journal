@@ -3,10 +3,7 @@
 
   <section class="field">
     <label>
-      {{input
-        type="checkbox"
-        checked=category.custom_fields.journal
-      }}
+      {{input type="checkbox" checked=category.custom_fields.journal}}
 
       {{i18n "category.enable_journal"}}
     </label>
@@ -31,19 +28,18 @@
       {{i18n "category.update_sort_order.label"}}
     </h4>
 
-    <p>{{i18n 'category.update_sort_order.description'}}</p>
+    <p>{{i18n "category.update_sort_order.description"}}</p>
 
     {{d-button
       label="category.update_sort_order.button"
       action="updateSortOrder"
-      icon="sync"}}
+      icon="sync"
+    }}
 
     {{#if syncResultIcon}}
       {{d-icon syncResultIcon}}
     {{else}}
-      {{conditional-loading-spinner
-        condition=updatingSortOrder
-        size="small"}}
+      {{conditional-loading-spinner condition=updatingSortOrder size="small"}}
     {{/if}}
   </section>
 </section>

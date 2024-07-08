@@ -20,7 +20,7 @@
 
       .post-controls .actions > *:not(.like):not(.double-button) {
         display: none;
-        transition: .5s all;
+        transition: 0.5s all;
       }
 
       .post-menu-area {
@@ -48,12 +48,15 @@
   }
 }
 
-.time-gap + .topic-post.entry, .time-gap + .topic-post.comment {
-  .topic-avatar, .topic-body {
+.time-gap + .topic-post.entry,
+.time-gap + .topic-post.comment {
+  .topic-avatar,
+  .topic-body {
     border-top: 1px solid $primary-low;
   }
 }
 
-.topic-post.entry + .time-gap, .topic-post.comment + .time-gap {
+.topic-post.entry + .time-gap,
+.topic-post.comment + .time-gap {
   display: none;
 }
