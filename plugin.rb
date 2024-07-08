@@ -2,7 +2,7 @@
 
 # name: discourse-journal
 # about: Create journals in discourse
-# version: 0.2.2
+# version: 0.3.0
 # authors: Angus McLeod
 # url: https://github.com/paviliondev/discourse-journal
 
