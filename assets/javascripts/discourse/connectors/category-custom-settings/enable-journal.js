@@ -1,44 +1,14 @@
 import { ajax } from "discourse/lib/ajax";
 
 export default {
-  setupComponent(attrs) {
-    const category = attrs.category;
-
-    if (!category.custom_fields) {
-      category.custom_fields = {};
-    }
-
-    if (!category.custom_fields.journal_author_groups) {
-      category.custom_fields.journal_author_groups = "";
-    }
-
-    const siteGroups = this.site.groups;
-    const authorGroups = category.custom_fields.journal_author_groups
-      .split("|")
-      .filter((a) => a.length !== "");
-
-    this.setProperties({
-      authorGroups,
-      siteGroups,
-      categoryId: category.id,
-    });
-  },
-
   actions: {
-    onSelectAuthorGroup(authorGroups) {
-      this.setProperties({
-        authorGroups,
-        "category.custom_fields.journal_author_groups": authorGroups.join("|"),
-      });
-    },
-
     updateSortOrder() {
       this.set("updatingSortOrder", true);
 
-      ajax("/journal//update-sort-order", {
+      ajax("/journal/update-sort-order", {
         type: "POST",
         data: {
-          category_id: this.categoryId,
+          category_id: this.category.id,
         },
       })
         .then((result) => {

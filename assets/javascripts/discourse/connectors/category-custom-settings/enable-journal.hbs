@@ -14,13 +14,7 @@
       {{i18n "category.journal_authors"}}
     </label>
 
-    {{group-chooser
-      content=siteGroups
-      value=authorGroups
-      valueProperty="name"
-      labelProperty="name"
-      onChange=(action "onSelectAuthorGroup")
-    }}
+    <JournalGroupChooser @category={{this.category}} />
   </section>
 
   <section class="field">
@@ -30,11 +24,10 @@
 
     <p>{{i18n "category.update_sort_order.description"}}</p>
 
-    {{d-button
-      label="category.update_sort_order.button"
-      action="updateSortOrder"
-      icon="sync"
-    }}
+    <DButton
+      @label="category.update_sort_order.button"
+      @action={{this.updateSortOrder}}
+      @icon="sync"/>
 
     {{#if syncResultIcon}}
       {{d-icon syncResultIcon}}
