@@ -1,6 +1,6 @@
-import { createWidget } from "discourse/widgets/widget";
 import { h } from "virtual-dom";
-import I18n from "I18n";
+import { createWidget } from "discourse/widgets/widget";
+import { i18n } from "discourse-i18n";
 
 createWidget("timeline-entries", {
   tagName: "div.timeline-entries",
@@ -19,7 +19,7 @@ createWidget("timeline-entries", {
     let contents = [
       this.attach("link", {
         className: "entries-title",
-        rawLabel: `${count} ${I18n.t("entry_lowercase", { count })}`,
+        rawLabel: `${count} ${i18n("entry_lowercase", { count })}`,
         action: "jumpTop",
       }),
     ];
@@ -70,7 +70,7 @@ createWidget("entry-marker", {
 
     return {
       style: `top: ${position - buffer}px; height: ${markerHeight}px`,
-      title: I18n.t("topic.entry.jump_to", { entryNumber }),
+      title: i18n("topic.entry.jump_to", { entryNumber }),
     };
   },
 

@@ -1,6 +1,5 @@
+import discourseComputed from "discourse/lib/decorators";
 import GroupChooser from "select-kit/components/group-chooser";
-import discourseComputed from "discourse-common/utils/decorators";
-import { action } from "@ember/object";
 
 export default GroupChooser.extend({
   valueProperty: "name",
@@ -13,7 +12,7 @@ export default GroupChooser.extend({
       this.set(
         "value",
         category.custom_fields.journal_author_groups.split("|").filter((a) => a.length !== "")
-      )
+      );
     }
   },
 

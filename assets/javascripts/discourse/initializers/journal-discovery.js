@@ -1,12 +1,12 @@
+import discourseComputed from "discourse/lib/decorators";
 import { withPluginApi } from "discourse/lib/plugin-api";
-import discourseComputed from "discourse-common/utils/decorators";
 
 const PLUGIN_ID = "discourse-journal";
 
 export default {
   name: "journal-discovery",
   initialize(container) {
-    const siteSettings = container.lookup("site-settings:main");
+     const siteSettings = container.lookup("service:site-settings");
     if (!siteSettings.journal_enabled) {
       return;
     }

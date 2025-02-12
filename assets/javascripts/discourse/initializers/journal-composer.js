@@ -1,16 +1,16 @@
-import { withPluginApi } from "discourse/lib/plugin-api";
-import discourseComputed from "discourse-common/utils/decorators";
-import { CREATE_TOPIC, EDIT, REPLY } from "discourse/models/composer";
 import { computed } from "@ember/object";
 import { alias } from "@ember/object/computed";
-import I18n from "I18n";
+import discourseComputed from "discourse/lib/decorators";
+import { withPluginApi } from "discourse/lib/plugin-api";
+import { CREATE_TOPIC, EDIT, REPLY } from "discourse/models/composer";
+import { i18n } from "discourse-i18n";
 
 const PLUGIN_ID = "discourse-journal";
 
 export default {
   name: "journal-composer",
   initialize(container) {
-    const siteSettings = container.lookup("site-settings:main");
+     const siteSettings = container.lookup("service:site-settings");
     if (!siteSettings.journal_enabled) {
       return;
     }
@@ -51,7 +51,7 @@ export default {
     }
 
     withPluginApi("0.8.12", (api) => {
-      api.modifyClass("controller:composer", {
+      api.modifyClass("service:composer", {
         pluginId: PLUGIN_ID,
 
         open(opts) {
@@ -117,7 +117,7 @@ export default {
           let text = getJournalComposerText(key);
 
           if (category && category.journal && text) {
-            return I18n.t(text.name);
+            return i18n(text.name);
           } else {
             return this._super(...arguments);
           }
@@ -155,8 +155,8 @@ export default {
               {
                 id: "reply_to_post",
                 icon: text.icon,
-                name: I18n.t(text.name),
-                description: I18n.t(text.description),
+                name: i18n(text.name),
+                description: i18n(text.description),
               },
             ];
           } else {
