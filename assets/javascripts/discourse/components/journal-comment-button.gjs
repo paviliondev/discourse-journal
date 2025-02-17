@@ -1,13 +1,17 @@
 import Component from "@glimmer/component";
 import DButton from "discourse/components/d-button";
 
-export default class CommentButton extends Component {
+export default class JournalCommentButton extends Component {
   static hidden() {
     return false;
   }
 
   get i18nKey() {
     return this.args.post.reply_to_post_number ? "comment_reply" : "comment";
+  }
+
+  get icon() {
+    return this.args.post.reply_to_post_number ? "reply" : "comment";
   }
 
   get label() {
@@ -27,7 +31,7 @@ export default class CommentButton extends Component {
       class="post-action-menu__comment create fade-out"
       ...attributes
       @action={{@buttonActions.replyToPost}}
-      @icon={{if this.args.post.reply_to_post_number "reply" "comment"}}
+      @icon={{this.icon}}
       @label={{this.label}}
       @title={{this.title}}
     />

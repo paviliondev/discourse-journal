@@ -3,7 +3,7 @@ import { alias } from "@ember/object/computed";
 import { withPluginApi } from "discourse/lib/plugin-api";
 import PostsWithPlaceholders from "discourse/lib/posts-with-placeholders";
 import { i18n } from "discourse-i18n";
-import CommentButton from "../components/journal-comment-button";
+import JournalCommentButton from "../components/journal-comment-button";
 
 const PLUGIN_ID = "discourse-journal";
 
@@ -21,7 +21,7 @@ export default {
         "post-menu-buttons",
         ({ value: dag, context: { post, buttonKeys, lastHiddenButtonKey } }) => {
           if (post.topic.details.can_create_post && post.journal) {
-            dag.add("comment", CommentButton, { after: lastHiddenButtonKey });
+            dag.add("comment", JournalCommentButton, { after: lastHiddenButtonKey });
             dag.delete(buttonKeys.REPLY);
           }
         }
@@ -41,7 +41,7 @@ export default {
         "entry_post_ids"
       );
 
-      api.decorateWidget("post:after", function(helper) {
+      api.decorateWidget("post:after", function (helper) {
         const model = helper.getModel();
 
         if (model.attachCommentToggle && model.hiddenComments > 0) {
