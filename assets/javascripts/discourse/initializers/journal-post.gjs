@@ -19,9 +19,14 @@ export default {
     withPluginApi("1.34.0", (api) => {
       api.registerValueTransformer(
         "post-menu-buttons",
-        ({ value: dag, context: { post, buttonKeys, lastHiddenButtonKey } }) => {
+        ({
+          value: dag,
+          context: { post, buttonKeys, lastHiddenButtonKey },
+        }) => {
           if (post.topic.details.can_create_post && post.journal) {
-            dag.add("comment", JournalCommentButton, { after: lastHiddenButtonKey });
+            dag.add("comment", JournalCommentButton, {
+              after: lastHiddenButtonKey,
+            });
             dag.delete(buttonKeys.REPLY);
           }
         }
@@ -52,9 +57,9 @@ export default {
             action: "showComments",
             actionParam: model.entry_post_id,
             rawLabel: i18n(`topic.comment.show_comments.${type}`, {
-              count: model.hiddenComments
+              count: model.hiddenComments,
             }),
-            className: "show-comments"
+            className: "show-comments",
           });
         }
       });
@@ -97,7 +102,7 @@ export default {
             this._super(...arguments),
             this.getProperties("showComments")
           );
-        }
+        },
       });
 
       api.reopenWidget("post-stream", {
@@ -188,12 +193,12 @@ export default {
           } else {
             attrs.posts = PostsWithPlaceholders.create({
               posts: postArray,
-              store
+              store,
             });
           }
 
           return this._super(attrs, state);
-        }
+        },
       });
 
       api.modifyClass("model:post-stream", {
@@ -311,7 +316,7 @@ export default {
           }
 
           return post;
-        }
+        },
       });
 
       api.reopenWidget("post-avatar", {
@@ -327,7 +332,7 @@ export default {
           }
 
           return this._super(...arguments);
-        }
+        },
       });
 
       api.reopenWidget("post", {
@@ -349,8 +354,7 @@ export default {
           }
 
           return this.attach("post-article", attrs);
-        }
-
+        },
       });
 
       api.reopenWidget("reply-to-tab", {
@@ -362,8 +366,8 @@ export default {
           } else {
             return this._super(...arguments);
           }
-        }
+        },
       });
     });
-  }
+  },
 };

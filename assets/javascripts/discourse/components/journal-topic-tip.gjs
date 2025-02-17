@@ -1,6 +1,6 @@
 import Component from "@glimmer/component";
 import dIcon from "discourse/helpers/d-icon";
-import { i18n } from 'discourse-i18n';
+import { i18n } from "discourse-i18n";
 import DTooltip from "float-kit/components/d-tooltip";
 
 export default class JournalTopicTip extends Component {
@@ -21,4 +21,4 @@ export default class JournalTopicTip extends Component {
       </DTooltip>
     </div>
   </template>
-};
+}

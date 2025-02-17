@@ -30,12 +30,16 @@
     <DButton
       @label="category.update_sort_order.button"
       @action={{this.updateSortOrder}}
-      @icon="arrows-rotate" />
+      @icon="arrows-rotate"
+    />
 
     {{#if this.syncResultIcon}}
       {{d-icon this.syncResultIcon}}
     {{else}}
-      {{conditional-loading-spinner condition=this.updatingSortOrder size="small"}}
+      {{conditional-loading-spinner
+        condition=this.updatingSortOrder
+        size="small"
+      }}
     {{/if}}
   </section>
 </section>

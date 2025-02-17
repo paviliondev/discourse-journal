@@ -6,7 +6,7 @@ const PLUGIN_ID = "discourse-journal";
 export default {
   name: "journal-discovery",
   initialize(container) {
-     const siteSettings = container.lookup("service:site-settings");
+    const siteSettings = container.lookup("service:site-settings");
     if (!siteSettings.journal_enabled) {
       return;
     }

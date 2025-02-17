@@ -15,7 +15,7 @@ export default class JournalCommentButton extends Component {
   }
 
   get label() {
-    if (!this.args.post.mobileView && !this.args.post.reply_to_post_number){
+    if (!this.args.post.mobileView && !this.args.post.reply_to_post_number) {
       return `topic.${this.i18nKey}.title`;
     } else {
       return "";
@@ -36,5 +36,4 @@ export default class JournalCommentButton extends Component {
       @title={{this.title}}
     />
   </template>
-
 }
