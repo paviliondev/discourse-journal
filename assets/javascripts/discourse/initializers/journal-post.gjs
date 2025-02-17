@@ -1,21 +1,40 @@
-import PostsWithPlaceholders from "discourse/lib/posts-with-placeholders";
-import { withPluginApi } from "discourse/lib/plugin-api";
+import Component from "@glimmer/component";
 import { alias } from "@ember/object/computed";
-import Composer from "discourse/models/composer";
-import I18n from "I18n";
+import { withPluginApi } from "discourse/lib/plugin-api";
+import PostsWithPlaceholders from "discourse/lib/posts-with-placeholders";
+import { i18n } from "discourse-i18n";
+import JournalCommentButton from "../components/journal-comment-button";
 
 const PLUGIN_ID = "discourse-journal";
 
 export default {
   name: "journal-post",
   initialize(container) {
-    const siteSettings = container.lookup("site-settings:main");
+    const siteSettings = container.lookup("service:site-settings");
+
     if (!siteSettings.journal_enabled) {
       return;
     }
 
+    withPluginApi("1.34.0", (api) => {
+      api.registerValueTransformer(
+        "post-menu-buttons",
+        ({
+          value: dag,
+          context: { post, buttonKeys, lastHiddenButtonKey },
+        }) => {
+          if (post.topic.details.can_create_post && post.journal) {
+            dag.add("comment", JournalCommentButton, {
+              after: lastHiddenButtonKey,
+            });
+            dag.delete(buttonKeys.REPLY);
+          }
+        }
+      );
+    });
+
     withPluginApi("0.8.12", (api) => {
-      const store = api.container.lookup("store:main");
+      const store = api.container.lookup("service:store");
 
       api.includePostAttributes(
         "journal",
@@ -27,16 +46,6 @@ export default {
         "entry_post_ids"
       );
 
-      api.reopenWidget("post-menu", {
-        menuItems() {
-          let result = siteSettings.post_menu.split("|").filter(Boolean);
-          if (this.attrs.journal) {
-            result = result.filter((b) => b !== "reply");
-          }
-          return result;
-        },
-      });
-
       api.decorateWidget("post:after", function (helper) {
         const model = helper.getModel();
 
@@ -47,7 +56,7 @@ export default {
           return helper.attach("link", {
             action: "showComments",
             actionParam: model.entry_post_id,
-            rawLabel: I18n.t(`topic.comment.show_comments.${type}`, {
+            rawLabel: i18n(`topic.comment.show_comments.${type}`, {
               count: model.hiddenComments,
             }),
             className: "show-comments",
@@ -69,26 +78,6 @@ export default {
         }
       });
 
-      api.addPostMenuButton("comment", (attrs) => {
-        if (attrs.canCreatePost && attrs.journal) {
-          let replyComment = attrs.reply_to_post_number;
-          let i18nKey = replyComment ? "comment_reply" : "comment";
-
-          let args = {
-            action: "openCommentCompose",
-            title: `topic.${i18nKey}.help`,
-            icon: replyComment ? "reply" : "comment",
-            className: "comment create fade-out",
-          };
-
-          if (!attrs.mobileView && !replyComment) {
-            args.label = `topic.${i18nKey}.title`;
-          }
-
-          return args;
-        }
-      });
-
       api.modifyClass("component:scrolling-post-stream", {
         pluginId: PLUGIN_ID,
 
@@ -97,7 +86,7 @@ export default {
         didInsertElement() {
           this._super(...arguments);
           this.appEvents.on("composer:opened", this, () => {
-            const composer = api.container.lookup("controller:composer");
+            const composer = api.container.lookup("service:composer");
             const post = composer.get("model.post");
 
             if (post && post.entry) {
@@ -365,16 +354,6 @@ export default {
           }
 
           return this.attach("post-article", attrs);
-        },
-
-        openCommentCompose() {
-          const opts = {
-            action: Composer.REPLY,
-            draftKey: this.model.topic.get("draft_key"),
-            draftSequence: this.model.topic.get("draft_sequence"),
-            post: this.model,
-          };
-          api.container.lookup("controller:composer").open(opts);
         },
       });
 

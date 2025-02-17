@@ -1,14 +1,14 @@
-import discourseComputed from "discourse-common/utils/decorators";
+import { scheduleOnce } from "@ember/runloop";
+import discourseComputed from "discourse/lib/decorators";
 import KeyboardShortcuts from "discourse/lib/keyboard-shortcuts";
 import { withPluginApi } from "discourse/lib/plugin-api";
-import { scheduleOnce } from "@ember/runloop";
 
 const PLUGIN_ID = "discourse-journal";
 
 export default {
   name: "journal-topic",
   initialize(container) {
-    const siteSettings = container.lookup("site-settings:main");
+    const siteSettings = container.lookup("service:site-settings");
     if (!siteSettings.journal_enabled) {
       return;
     }

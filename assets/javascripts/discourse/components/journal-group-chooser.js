@@ -1,6 +1,5 @@
+import discourseComputed from "discourse/lib/decorators";
 import GroupChooser from "select-kit/components/group-chooser";
-import discourseComputed from "discourse-common/utils/decorators";
-import { action } from "@ember/object";
 
 export default GroupChooser.extend({
   valueProperty: "name",
@@ -12,8 +11,10 @@ export default GroupChooser.extend({
     if (category.custom_fields?.journal_author_groups) {
       this.set(
         "value",
-        category.custom_fields.journal_author_groups.split("|").filter((a) => a.length !== "")
-      )
+        category.custom_fields.journal_author_groups
+          .split("|")
+          .filter((a) => a.length !== "")
+      );
     }
   },
 
@@ -26,10 +27,10 @@ export default GroupChooser.extend({
     onChange(authorGroups) {
       const category = this.get("category");
       const customFields = category.custom_fields || {};
-      customFields['journal_author_groups'] =  authorGroups.join("|");
+      customFields["journal_author_groups"] = authorGroups.join("|");
       this.setProperties({
-        "value": authorGroups,
-        "category.custom_fields": customFields
+        value: authorGroups,
+        "category.custom_fields": customFields,
       });
     },
   },

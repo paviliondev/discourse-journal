@@ -3,8 +3,11 @@
 
   <section class="field">
     <label>
-      {{input type="checkbox" checked=category.custom_fields.journal}}
-
+      <Input
+        id="enable-journal-for-category"
+        @type="checkbox"
+        @checked={{@outletArgs.category.custom_fields.journal}}
+      />
       {{i18n "category.enable_journal"}}
     </label>
   </section>
@@ -13,8 +16,8 @@
     <label for="category-journal-authors">
       {{i18n "category.journal_authors"}}
     </label>
+    <JournalGroupChooser @category={{@outletArgs.category}} />
 
-    <JournalGroupChooser @category={{this.category}} />
   </section>
 
   <section class="field">
@@ -27,12 +30,16 @@
     <DButton
       @label="category.update_sort_order.button"
       @action={{this.updateSortOrder}}
-      @icon="sync"/>
+      @icon="arrows-rotate"
+    />
 
-    {{#if syncResultIcon}}
-      {{d-icon syncResultIcon}}
+    {{#if this.syncResultIcon}}
+      {{d-icon this.syncResultIcon}}
     {{else}}
-      {{conditional-loading-spinner condition=updatingSortOrder size="small"}}
+      {{conditional-loading-spinner
+        condition=this.updatingSortOrder
+        size="small"
+      }}
     {{/if}}
   </section>
 </section>

@@ -5,6 +5,7 @@
   "author": "Pavilion",
   "license": "GPL V2",
   "devDependencies": {
+    "ember-template-lint": "^6.1.0",
     "eslint-config-discourse": "^3.4.0",
     "semver": "^7.3.5"
   }
