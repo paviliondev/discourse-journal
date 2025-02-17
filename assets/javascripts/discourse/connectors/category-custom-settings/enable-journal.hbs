@@ -6,7 +6,7 @@
       <Input
         id="enable-journal-for-category"
         @type="checkbox"
-        @checked={{@outletArgs.model.custom_fields.journal}}
+        @checked={{@outletArgs.category.custom_fields.journal}}
       />
       {{i18n "category.enable_journal"}}
     </label>
@@ -16,8 +16,8 @@
     <label for="category-journal-authors">
       {{i18n "category.journal_authors"}}
     </label>
+    <JournalGroupChooser @category={{@outletArgs.category}} />
 
-    <JournalGroupChooser @category={{@outletArgs.model}} />
   </section>
 
   <section class="field">
