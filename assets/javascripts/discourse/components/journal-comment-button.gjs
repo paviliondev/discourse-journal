@@ -1,5 +1,8 @@
 import Component from "@glimmer/component";
 import DButton from "discourse/components/d-button";
+import { action } from "@ember/object";
+import Composer from "discourse/models/composer";
+import { getOwner } from "@ember/owner";
 
 export default class JournalCommentButton extends Component {
   static hidden() {
@@ -26,11 +29,22 @@ export default class JournalCommentButton extends Component {
     return `topic.${this.i18nKey}.help`;
   }
 
+  @action
+  openCommentCompose() {
+    const opts = {
+      action: Composer.REPLY,
+      draftKey: this.args.post.topic.get("draft_key"),
+      draftSequence: this.args.post.topic.get("draft_sequence"),
+      post: this.args.post,
+    };
+    getOwner(this).lookup("service:composer").open(opts);
+  }
+
   <template>
     <DButton
-      class="post-action-menu__comment create fade-out"
+      class="comment create fade-out"
       ...attributes
-      @action={{@buttonActions.replyToPost}}
+      @action={{this.openCommentCompose}}
       @icon={{this.icon}}
       @label={{this.label}}
       @title={{this.title}}
